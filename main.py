@@ -6,8 +6,7 @@ import sqlite3
 
 
 def main():
-    db = sqlite3.connect("school.db")
-    create_db(db)
+    db = sqlite3.connect("School_DB.db")
     main_gui = MainGui()
     main_gui.add_option("Etaty", Etaty(main_gui.window, db).show_frame)
     main_gui.add_option("Pracownicy", Pracownicy(main_gui.window, db).show_frame)
