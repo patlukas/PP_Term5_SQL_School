@@ -28,3 +28,21 @@ class GuiMethods:
                 m.grab_release()
         else:
             pass
+
+    @staticmethod
+    def _create_frame_edit_or_add(master, title, labels, values, on_click, button_label):
+        frame = tk.Frame(master=master)
+        list_label_el = []
+        list_entry_el = []
+        for i, label in enumerate(labels):
+            list_label_el.append(tk.Label(master=frame, text=label))
+            list_entry_el.append(tk.Entry(master=frame))
+            list_label_el[-1].grid(row=1, column=i)
+            list_entry_el[-1].grid(row=2, column=i)
+            if values is not None:
+                list_entry_el[-1].insert(0, values[i])
+
+        tk.Label(master=frame, text=title).grid(row=0, column=0, columnspan=len(list_label_el))
+        button = tk.Button(master=frame, text=button_label, command=lambda: on_click(list_entry_el))
+        button.grid(row=3, column=len(list_label_el)-1)
+        return frame

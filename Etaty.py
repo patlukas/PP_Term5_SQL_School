@@ -14,8 +14,8 @@ class Etaty(GuiMethods):
             x.destroy()
         frame = tk.Frame(master=self.__window)
         label = tk.Label(master=frame, text="Etaty")
-        table = self._create_table(frame, ["Nazwa", "Płaca minimalna", "Płaca maksymalna"], self.__rows, self.__edit_row, self.__del_row)
-        button = tk.Button(master=frame, text="Dodaj etat", command=self.__add_etat)
+        table = self._create_table(frame, ["Nazwa", "Płaca minimalna", "Płaca maksymalna"], self.__rows, self.__frame_edit_row, self.__frame_del_row)
+        button = tk.Button(master=frame, text="Dodaj etat", command=self.__frame_add_etat)
         label.pack()
         table.pack()
         button.pack()
@@ -27,13 +27,27 @@ class Etaty(GuiMethods):
         rows = cur.fetchall()
         return rows
 
-    def __add_etat(self):
+    def __frame_add_etat(self):
+        for x in self.__window.winfo_children():
+            x.destroy()
+        frame = self._create_frame_edit_or_add(self.__window, "Dodanie etatu", ["Nazwa etatu", "Płaca minimalna", "Płaca maksymalna"], None, self.__add_etat_to_db, "Stwórz etat")
+        frame.pack()
         print("Dodaj etat")
 
-    def __edit_row(self, id: int):
+    def __add_etat_to_db(self, list_entry: list[tk.Entry]):
+        for entry in list_entry:
+            print(entry.get())
+
+    def __frame_edit_row(self, id: int):
+        for x in self.__window.winfo_children():
+            x.destroy()
+        frame = self._create_frame_edit_or_add(self.__window, "Edycja etatu", ["Nazwa etatu", "Płaca minimalna", "Płaca maksymalna"], self.__rows[id], lambda x: print(f"Click {x}"), "Edytuj etat")
+        frame.pack()
+
         print(f"Edycja {self.__rows[id]}")
 
-    def __del_row(self, id: int):
+    def __frame_del_row(self, id: int):
         print(f"Usuń {self.__rows[id]}")
+
 
 
