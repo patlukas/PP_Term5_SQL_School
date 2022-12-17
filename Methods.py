@@ -1,0 +1,142 @@
+import math
+import tkinter as tk
+from tkinter import ttk
+from tkinter import messagebox
+import datetime
+
+
+class Methods:
+    def _create_table(self, master, labels, rows, on_edit, on_del):
+        table = ttk.Treeview(master=master)
+        table['columns'] = labels
+        table.column("#0", width=0, stretch=tk.NO)
+        for i in range(len(labels)):
+            table.column(labels[i], anchor=tk.CENTER)
+            table.heading(labels[i], text=labels[i], anchor=tk.CENTER)
+        for i, row in enumerate(rows):
+            table.insert(parent='', index='end', iid=i, text='', values=row)
+        table.bind("<Button-3>", lambda x: self.__table_right_click(table, on_edit, on_del, x))
+        return table
+
+    @staticmethod
+    def __table_right_click(table, on_edit, on_del, event):
+        m = tk.Menu(tearoff=0)
+        iid = table.identify_row(event.y)
+        if on_edit is not None:
+            m.add_command(label="Edytuj", command=lambda: on_edit(int(iid)))
+        m.add_command(label="Usuń", command=lambda: on_del(int(iid)))
+        if iid:
+            table.selection_set(iid)
+            try:
+                m.tk_popup(event.x_root, event.y_root)
+            finally:
+                m.grab_release()
+        else:
+            pass
+
+    def _create_frame_edit_or_add(self, master, title, labels, values, types: list, on_click, button_label):
+        """
+        :param types: każdy element listy odpowiada jednej kolumnie, jeżeli
+                        - None - wartość nie zmienialna (Label)
+                        - str - wartość wpisywana ręcznie (Entry)
+                        - lista z elementami - lista z wyborem (Combobox)
+        """
+        frame = tk.Frame(master=master)
+        list_label_el, list_input_el = [], []
+        for i, label in enumerate(labels):
+            list_label_el.append(tk.Label(master=frame, text=label))
+            text = "" if values is None else values[i]
+            if types[i] == str:
+                list_input_el.append(tk.Entry(master=frame))
+                list_input_el[-1].insert(0, text)
+            elif type(types[i]) == list:
+                list_input_el.append(ttk.Combobox(master=frame, state="readonly", values=types[i]))
+                if text in types[i]:
+                    list_input_el[-1].current(types[i].index(text))
+            else:
+                list_input_el.append(tk.Label(master=frame, text=text))
+            list_label_el[-1].grid(row=1, column=i)
+            list_input_el[-1].grid(row=2, column=i)
+
+        tk.Label(master=frame, text=title).grid(row=0, column=0, columnspan=len(list_label_el))
+        button = tk.Button(master=frame, text=button_label, command=lambda: on_click(self.__get_list_str_from_list_el(list_input_el)))
+        button.grid(row=3, column=len(list_label_el)-1)
+        return frame
+
+    @staticmethod
+    def __get_list_str_from_list_el(list_el: list) -> list[str]:
+        list_str = []
+        for el in list_el:
+            if type(el) in [tk.Entry, ttk.Combobox]:
+                list_str.append(el.get())
+            elif type(el) == tk.Label:
+                list_str.append(el.cget("text"))
+            else:
+                list_str.append("")
+        return list_str
+
+    def check_varchar2(self, data, max_length, name, optional=False) -> bool:
+        if len(data) > max_length:
+            messagebox.showerror(f"Błędna wartość {name}", f"Długość {name} musi być dłuższa niż {max_length}")
+            return False
+        elif len(data) == 0 and not optional:
+            messagebox.showerror(f"Błędna wartość {name}", f"{name} jest obowiązkowa")
+            return False
+        return True
+
+    @staticmethod
+    def check_number(data, precision, scale, name) -> bool:
+        if data == "":
+            messagebox.showerror(f"Błędna wartość {name}", f"{name} jest obowiązkowa")
+            return False
+        try:
+            data = float(data)
+            if data != math.floor(data*10**scale) / 10**scale:
+                messagebox.showerror(f"Błędna wartość {name}", f"{name} może mieć maksymalnie {scale} cyfry po przecinku")
+                return False
+            data = abs(data)
+            while data != int(data):
+                data *= 10
+            if data >= 10**precision:
+                messagebox.showerror(f"Błędna wartość {name}",
+                                     f"{name} może mieć maksymalnie {precision} cyfry")
+                return False
+        except ValueError:
+            messagebox.showerror(f"Błędna wartość {name}", f"{name} musi być liczbą")
+            return False
+        return True
+
+    @staticmethod
+    def check_foreign_key(data, list_foreign_key, name) -> bool:
+        if data in list_foreign_key:
+            return True
+        else:
+            messagebox.showerror(f"Błędna wartość {name}", f"{name} musi być wybrane z listy kluczów obcych")
+            return False
+
+    @staticmethod
+    def check_pesel(data: str, name="Pesel") -> bool:
+        if len(data) != 11:
+            messagebox.showerror(f"Błędna długość {name}", f"{name} musi mieć długość równą 11")
+        elif not data.isnumeric():
+            messagebox.showerror(f"Błędna wartość {name}", f"{name} musi składać się wyłącznei z cyfr")
+        else:
+            return True
+
+    @staticmethod
+    def check_date(data: str, name) -> bool:
+        data = data.strip()
+        date_split = data.split(".")
+        if len(date_split) != 3:
+            messagebox.showerror(f"Błędna format {name}", f"{name} mui być w formacie 'DD.MM.RRRR'")
+        elif not date_split[0].isnumeric() or not date_split[1].isnumeric() or not date_split[2].isnumeric():
+            messagebox.showerror(f"Błędna format {name}", f"{name} dzień, miesiąc i rok muszą być cyframi")
+        else:
+            try:
+                d, m, y = int(date_split[0]), int(date_split[1]), int(date_split[2])
+                datetime.datetime(year=y, month=m, day=d)
+                return True
+            except Exception as e:
+                print(e)
+                messagebox.showerror(f"Błędna format {name}", f"{name} jest błędną datą")
+        return False
