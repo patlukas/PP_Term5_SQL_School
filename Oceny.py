@@ -1,9 +1,9 @@
 import sqlite3
 import tkinter as tk
-from GuiMethods import GuiMethods
+from Methods import Methods
 
 
-class Oceny(GuiMethods):
+class Oceny(Methods):
     def __init__(self, window: tk.Frame, db: sqlite3.Connection):
         self.__window = window
         self.__db = db

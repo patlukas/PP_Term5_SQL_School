@@ -19,19 +19,19 @@ def main():
     db.close()
 
 
-def create_db(db: sqlite3.Connection) -> None:
-    db.execute("""DROP TABLE etaty""")
-    db.execute("""
-        CREATE TABLE etaty (
-            nazwa     VARCHAR2(20) NOT NULL PRIMARY KEY,
-            placa_min NUMBER(9, 2) NOT NULL,
-            placa_max NUMBER(9, 2) NOT NULL
-        );
-    """)
-    db.execute("""INSERT INTO etaty VALUES ('etat 1', 123.45, 678.90);""")
-    db.execute("""INSERT INTO etaty VALUES ('etat 2', 246, 2468);""")
-    db.execute("""INSERT INTO etaty VALUES ('etat 3', 333, 3333);""")
-    db.commit()
+# def create_db(db: sqlite3.Connection) -> None:
+#     db.execute("""DROP TABLE etaty""")
+#     db.execute("""
+#         CREATE TABLE etaty (
+#             nazwa     VARCHAR2(20) NOT NULL PRIMARY KEY,
+#             placa_min NUMBER(9, 2) NOT NULL,
+#             placa_max NUMBER(9, 2) NOT NULL
+#         );
+#     """)
+#     db.execute("""INSERT INTO etaty VALUES ('etat 1', 123.45, 678.90);""")
+#     db.execute("""INSERT INTO etaty VALUES ('etat 2', 246, 2468);""")
+#     db.execute("""INSERT INTO etaty VALUES ('etat 3', 333, 3333);""")
+#     db.commit()
 
 
 if __name__ == "__main__":
