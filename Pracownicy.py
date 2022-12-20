@@ -23,7 +23,7 @@ class Pracownicy(Methods):
         label = tk.Label(master=frame, text="Pracownicy")
         table = self._create_table(frame, ["Pesel", "Imie", "Nazwisko", "Data urodzenia", "Data zatrudnienia", "Płaca", "Etat"],
                                    self.__rows, self.__frame_edit_row, self.__frame_del_row)
-        button = tk.Button(master=frame, text="Dodaj etat", command=self.__frame_add_etat)
+        button = tk.Button(master=frame, text="Dodaj pracownika", command=self.__frame_add_etat)
         label.pack()
         table.pack()
         button.pack()
