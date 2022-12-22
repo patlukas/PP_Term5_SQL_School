@@ -1,7 +1,9 @@
 from MainGui import MainGui
 from Oceny import Oceny
 from Etaty import Etaty
+from Sale import Sale
 from Pracownicy import Pracownicy
+from Przedmioty import Przedmioty
 import sqlite3
 
 
@@ -11,8 +13,8 @@ def main():
     main_gui.add_option("Etaty", Etaty(main_gui.window, db).show_frame)
     main_gui.add_option("Pracownicy", Pracownicy(main_gui.window, db).show_frame)
     main_gui.add_option("Oceny", Oceny(main_gui.window, db).show_frame)
-    main_gui.add_option("opcja 3", lambda: print("Cześć jestem 3"))
-    main_gui.add_option("opcja 4", lambda: print("Cześć jestem 4"))
+    main_gui.add_option("Sale", Sale(main_gui.window, db).show_frame)
+    main_gui.add_option("Przedmioty", Przedmioty(main_gui.window, db).show_frame)
     main_gui.add_option("opcja 5", lambda: print("Cześć jestem 5"))
     main_gui.add_option("opcja 6", lambda: print("Cześć jestem 6"))
     main_gui.start_gui()
