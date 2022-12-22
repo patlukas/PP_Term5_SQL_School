@@ -13,8 +13,12 @@ class Methods:
         for i in range(len(labels)):
             table.column(labels[i], anchor=tk.CENTER)
             table.heading(labels[i], text=labels[i], anchor=tk.CENTER)
+        print(rows)
         for i, row in enumerate(rows):
-            table.insert(parent='', index='end', iid=i, text='', values=row)
+            val_row = []
+            for one_val in row:
+                val_row.append(one_val if type(one_val) != bool else ("Tak" if one_val else "Nie"))
+            table.insert(parent='', index='end', iid=i, text='', values=val_row)
         table.bind("<Button-3>", lambda x: self.__table_right_click(table, on_edit, on_del, x))
         return table
 
@@ -40,23 +44,33 @@ class Methods:
                         - None - wartość nie zmienialna (Label)
                         - str - wartość wpisywana ręcznie (Entry)
                         - lista z elementami - lista z wyborem (Combobox)
+                        - bool - Checkbutton
         """
         frame = tk.Frame(master=master)
-        list_label_el, list_input_el = [], []
+        list_label_el, list_input_widget, list_input_el = [], [], []
         for i, label in enumerate(labels):
             list_label_el.append(tk.Label(master=frame, text=label))
             text = "" if values is None else values[i]
             if types[i] == str:
-                list_input_el.append(tk.Entry(master=frame))
-                list_input_el[-1].insert(0, text)
+                list_input_widget.append(tk.Entry(master=frame))
+                list_input_widget[-1].insert(0, text)
             elif type(types[i]) == list:
-                list_input_el.append(ttk.Combobox(master=frame, state="readonly", values=types[i]))
+                list_input_widget.append(ttk.Combobox(master=frame, state="readonly", values=types[i]))
                 if text in types[i]:
-                    list_input_el[-1].current(types[i].index(text))
+                    list_input_widget[-1].current(types[i].index(text))
+            elif types[i] == bool:
+                check_var = tk.BooleanVar()
+                if type(text) == bool:
+                    check_var.set(text)
+                list_input_widget.append(tk.Checkbutton(master=frame, variable=check_var))
+                list_input_el.append(check_var)
             else:
-                list_input_el.append(tk.Label(master=frame, text=text))
+                list_input_widget.append(tk.Label(master=frame, text=text))
+
+            if len(list_input_widget) != len(list_input_el):
+                list_input_el.append(list_input_widget[-1])
             list_label_el[-1].grid(row=1, column=i)
-            list_input_el[-1].grid(row=2, column=i)
+            list_input_widget[-1].grid(row=2, column=i)
 
         tk.Label(master=frame, text=title).grid(row=0, column=0, columnspan=len(list_label_el))
         button = tk.Button(master=frame, text=button_label, command=lambda: on_click(self.__get_list_str_from_list_el(list_input_el)))
@@ -67,7 +81,7 @@ class Methods:
     def __get_list_str_from_list_el(list_el: list) -> list[str]:
         list_str = []
         for el in list_el:
-            if type(el) in [tk.Entry, ttk.Combobox]:
+            if type(el) in [tk.Entry, ttk.Combobox, tk.BooleanVar]:
                 list_str.append(el.get())
             elif type(el) == tk.Label:
                 list_str.append(el.cget("text"))

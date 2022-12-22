@@ -75,8 +75,8 @@ class Etaty(Methods):
         decision = messagebox.askquestion("Usuwanie rekordu", f"Czy jesteś pewny że chcesz usunąć etat o nazwie '{self.__rows[id][0]}'?")
         if decision == "yes":
             try:
-                self.__db.execute("DELETE FROM etaty WHERE nazwa=?", [self.__rows[id][0]])
                 self.__db.execute("UPDATE pracownicy SET Etaty_nazwa='' WHERE Etaty_nazwa=?", [self.__rows[id][0]])
+                self.__db.execute("DELETE FROM etaty WHERE nazwa=?", [self.__rows[id][0]])
                 self.show_frame()
             except Exception as e:
                 print(e)
