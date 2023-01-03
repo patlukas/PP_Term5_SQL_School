@@ -8,7 +8,8 @@ class Pracownicy(Methods):
     def __init__(self, window: tk.Frame, db: sqlite3.Connection):
         self.__window = window
         self.__db = db
-        self.__list_labels = ["Pesel", "Imie", "Nazwisko", "Data urodzenia", "Data zatrudnienia", "Płaca", "Etat", "Czy nauczyciel"]
+        self.__list_labels = ["Pesel", "Imie", "Nazwisko", "Data urodzenia", "Data zatrudnienia", "Płaca", "Etat",
+                              "Czy nauczyciel"]
         self.__rows = []
         self.__list_etat_row = []
         self.__list_etat = []
@@ -64,7 +65,11 @@ class Pracownicy(Methods):
         frame.pack()
 
     def __frame_del_row(self, id: int):
-        decision = messagebox.askquestion("Usuwanie rekordu", f"Czy jesteś pewny że chcesz usunąć pracownika z peselem '{self.__rows[id][0]}'?")
+        if self.__check_teacher_is_used(self.__rows[id][0], "Nie można usunąć pracownika z rolą nauczyciela"):
+            return
+
+        decision = messagebox.askquestion("Usuwanie rekordu",
+                                          f"Czy jesteś pewny że chcesz usunąć pracownika z peselem '{self.__rows[id][0]}'?")
         if decision == "yes":
             try:
                 self.__db.execute("DELETE FROM pracownicy WHERE pesel=?", [self.__rows[id][0]])
@@ -96,14 +101,19 @@ class Pracownicy(Methods):
         list_data = self.__data_validation(list_data)
         if list_data is not False:
             try:
-                self.__db.execute(
-                    "UPDATE pracownicy SET imie=?, nazwisko=?, data_urodzenia=?, data_zatrudnienia=?, płaca=?, Etaty_nazwa=?  WHERE pesel=?",
-                    [list_data[1], list_data[2], list_data[3], list_data[4], list_data[5], list_data[6], list_data[0]]
-                )
                 nauczyciel = True
                 for row in self.__rows:
                     if row[0] == list_data[0]:
                         nauczyciel = row[-1]
+                if nauczyciel and not list_data[-1]:
+                    if self.__check_teacher_is_used(list_data[0], "Nie można usunąć pracownikowi roli nauczyciela"):
+                        return
+
+                self.__db.execute(
+                    "UPDATE pracownicy SET imie=?, nazwisko=?, data_urodzenia=?, data_zatrudnienia=?, płaca=?, Etaty_nazwa=?  WHERE pesel=?",
+                    [list_data[1], list_data[2], list_data[3], list_data[4], list_data[5], list_data[6], list_data[0]]
+                )
+
                 if nauczyciel != list_data[-1]:
                     if list_data[-1]:
                         self.__db.execute("INSERT INTO nauczyciele VALUES(?)", [list_data[0]])
@@ -114,15 +124,40 @@ class Pracownicy(Methods):
                 print(e)
                 messagebox.showerror("Błąd przy edycji pracownika!", "Niezydentyfikowany błąd")
 
+    def __check_teacher_is_used(self, pesel, message):
+        check_data = [
+            [
+                "SELECT * FROM oceny WHERE Nauczyciele_pesel=?", [pesel],
+                f"{message}, bo istnieją oceny wystawione przez tego nauczyciela"
+            ],
+            [
+                "SELECT * FROM Nauczyciele_przedmioty WHERE Nauczyciele_pesel=?", [pesel],
+                f"{message}, bo istnieją przedmioty do których jest przypisany jako nauczyciel"
+            ],
+            [
+                "SELECT * FROM Klasy WHERE Nauczyciele_pesel=?", [pesel],
+                f"{message}, bo jest wychowawca klasy"
+            ],
+            [
+                "SELECT * FROM Sprawdziany WHERE Nauczyciele_pesel=?", [pesel],
+                f"{message}, bo istnieją sprawdziany zaplanowane przez tego nauczyciela"
+            ],
+            [
+                "SELECT * FROM Zajecia WHERE Nauczyciele_pesel=?", [pesel],
+                f"{message}, bo istnieją zajęcia, które ma prodadzić."
+            ]
+        ]
+        return not self.check_delete_is_possible(self.__db, check_data)
+
     def __data_validation(self, list_data):
         if not (
-            self.check_pesel(list_data[0]) and
-            self.check_varchar2(list_data[1], 30, "Imie") and
-            self.check_varchar2(list_data[2], 30, "Nazwisko") and
-            self.check_date(list_data[3], "Data urodzenia") and
-            self.check_date(list_data[4], "Data zatrudnienia") and
-            self.check_number(list_data[5], 9, 2, "Płaca") and
-            self.check_foreign_key(list_data[6], self.__list_etat, "Etat")
+                self.check_pesel(list_data[0]) and
+                self.check_varchar2(list_data[1], 30, "Imie") and
+                self.check_varchar2(list_data[2], 30, "Nazwisko") and
+                self.check_date(list_data[3], "Data urodzenia") and
+                self.check_date(list_data[4], "Data zatrudnienia") and
+                self.check_number(list_data[5], 9, 2, "Płaca") and
+                self.check_foreign_key(list_data[6], self.__list_etat, "Etat")
         ):
             return False
 
@@ -131,6 +166,7 @@ class Pracownicy(Methods):
         for etat_row in self.__list_etat_row:
             if etat_row[0] == list_data[6]:
                 if list_data[5] < float(etat_row[1]) or list_data[5] > float(etat_row[2]):
-                    messagebox.showerror("Błędna płaca!", f"Płaca musi być z przedniału od {etat_row[1]} do {etat_row[2]}")
+                    messagebox.showerror("Błędna płaca!",
+                                         f"Płaca musi być z przedniału od {etat_row[1]} do {etat_row[2]}")
                     return False
         return list_data
