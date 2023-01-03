@@ -3,6 +3,7 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter import messagebox
 import datetime
+import sqlite3
 
 
 class Methods:
@@ -154,3 +155,28 @@ class Methods:
                 print(e)
                 messagebox.showerror(f"Błędna format {name}", f"{name} jest błędną datą")
         return False
+
+    @staticmethod
+    def check_delete_is_possible(db: sqlite3.Connection, data: list[list]) -> bool:
+        """
+        :param db: połączenie z bazą danych
+        :param data: lista trzyelementowych list z kolejno poleceniem sql, atrybutami do polecenia, treścią wiadomości do pokazania jak polecenie coś zwróci
+            [
+                str <polecenie SELECT sprawdzające czy sprawdzany rekord jest użyty>,
+                list <lista strybutów potrzebnych do wywołania polecenia sql (to co trzeba wstawić zamiast '?'>
+                str <wiadomość, jaka ma zostać wyświetlona w przypadku, gdy rekord jest używany>
+            ]
+        :return: True jeżeli można usunąć rekord, False jeżeli nie można usunąć rekordu
+        """
+        try:
+            for sql, attributes, message in data:
+                cur = db.cursor()
+                cur.execute(sql, attributes)
+                if cur.fetchone() is not None:
+                    messagebox.showinfo("Problem z usuwaniem", message)
+                    return False
+            return True
+        except Exception as e:
+            print(e)
+            messagebox.showerror("Błąd przy sprawdzaniu, czy usunięcie jest możliwe")
+            return False

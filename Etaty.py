@@ -72,10 +72,19 @@ class Etaty(Methods):
                 messagebox.showerror("Błąd przy edycji etatu!", "Niezydentyfikowany błąd")
 
     def __frame_del_row(self, id: int):
+        check_data = [
+            [
+                "SELECT * FROM pracownicy WHERE Etaty_nazwa=?",
+                [self.__rows[id][0]],
+                "Nie można usunąć etatu, bo istnieje pracownik zatrudniony na tym etacie"
+            ]
+        ]
+        if not self.check_delete_is_possible(self.__db, check_data):
+            return
+
         decision = messagebox.askquestion("Usuwanie rekordu", f"Czy jesteś pewny że chcesz usunąć etat o nazwie '{self.__rows[id][0]}'?")
         if decision == "yes":
             try:
-                self.__db.execute("UPDATE pracownicy SET Etaty_nazwa='' WHERE Etaty_nazwa=?", [self.__rows[id][0]])
                 self.__db.execute("DELETE FROM etaty WHERE nazwa=?", [self.__rows[id][0]])
                 self.show_frame()
             except Exception as e:
