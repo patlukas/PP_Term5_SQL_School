@@ -178,5 +178,5 @@ class Methods:
             return True
         except Exception as e:
             print(e)
-            messagebox.showerror("Błąd przy sprawdzaniu, czy usunięcie jest możliwe")
+            messagebox.showerror("", "Błąd przy sprawdzaniu, czy usunięcie jest możliwe")
             return False

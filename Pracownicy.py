@@ -131,7 +131,7 @@ class Pracownicy(Methods):
                 f"{message}, bo istnieją oceny wystawione przez tego nauczyciela"
             ],
             [
-                "SELECT * FROM Nauczyciele_przedmioty WHERE Nauczyciele_pesel=?", [pesel],
+                "SELECT * FROM Nauczyciele_przedmioty WHERE Nauczyciel_pesel=?", [pesel],
                 f"{message}, bo istnieją przedmioty do których jest przypisany jako nauczyciel"
             ],
             [
