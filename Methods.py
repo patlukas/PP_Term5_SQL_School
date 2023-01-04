@@ -122,11 +122,11 @@ class Methods:
         return True
 
     @staticmethod
-    def check_foreign_key(data, list_foreign_key, name) -> bool:
+    def check_value_from_list(data, list_foreign_key, name) -> bool:
         if data in list_foreign_key:
             return True
         else:
-            messagebox.showerror(f"Błędna wartość {name}", f"{name} musi być wybrane z listy kluczów obcych")
+            messagebox.showerror(f"Błędna wartość {name}", f"{name} musi być wybrane z listy")
             return False
 
     @staticmethod

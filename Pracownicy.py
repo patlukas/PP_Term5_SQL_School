@@ -157,7 +157,7 @@ class Pracownicy(Methods):
                 self.check_date(list_data[3], "Data urodzenia") and
                 self.check_date(list_data[4], "Data zatrudnienia") and
                 self.check_number(list_data[5], 9, 2, "Płaca") and
-                self.check_foreign_key(list_data[6], self.__list_etat, "Etat")
+                self.check_value_from_list(list_data[6], self.__list_etat, "Etat")
         ):
             return False
 
