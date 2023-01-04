@@ -1,5 +1,5 @@
 from MainGui import MainGui
-from Oceny import Oceny
+from Klasy import Klasy
 from Etaty import Etaty
 from Sale import Sale
 from Pracownicy import Pracownicy
@@ -12,7 +12,7 @@ def main():
     main_gui = MainGui()
     main_gui.add_option("Etaty", Etaty(main_gui.window, db).show_frame)
     main_gui.add_option("Pracownicy", Pracownicy(main_gui.window, db).show_frame)
-    main_gui.add_option("Oceny", Oceny(main_gui.window, db).show_frame)
+    main_gui.add_option("Klasy", Klasy(main_gui.window, db).show_frame)
     main_gui.add_option("Sale", Sale(main_gui.window, db).show_frame)
     main_gui.add_option("Przedmioty", Przedmioty(main_gui.window, db).show_frame)
     main_gui.add_option("opcja 5", lambda: print("Cześć jestem 5"))
