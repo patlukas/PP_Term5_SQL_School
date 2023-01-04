@@ -47,9 +47,11 @@ class Etaty(Methods):
                 self.show_frame()
             except sqlite3.IntegrityError:
                 messagebox.showerror("Błąd przy dodanianie etatu!", "Nazwa etatu musi być unikalna")
+                self.__db.rollback()
             except Exception as e:
                 print(e)
                 messagebox.showerror("Błąd przy dodanianie etatu!", "Niezydentyfikowany błąd")
+                self.__db.rollback()
 
     def __frame_edit_row(self, id: int):
         for x in self.__window.winfo_children():
@@ -70,6 +72,7 @@ class Etaty(Methods):
             except Exception as e:
                 print(e)
                 messagebox.showerror("Błąd przy edycji etatu!", "Niezydentyfikowany błąd")
+                self.__db.rollback()
 
     def __frame_del_row(self, id: int):
         check_data = [
@@ -90,6 +93,7 @@ class Etaty(Methods):
             except Exception as e:
                 print(e)
                 messagebox.showerror("Błąd przy usuwaniu rekordu!", f"Niepowiodło się usunięcie '{self.__rows[id][0]}'")
+                self.__db.rollback()
 
     def __data_validation(self, list_data):
         if not (
