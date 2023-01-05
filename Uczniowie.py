@@ -111,4 +111,22 @@ class Uczniowie(Methods):
                 messagebox.showerror("Błąd przy edycji pracownika!", "Niezydentyfikowany błąd")
 
     def __frame_del_row(self, id: int):
-        pass
+        check_data = [
+            [
+                "SELECT * FROM oceny WHERE uczniowie_pesel=?",
+                [self.__rows[id][0]],
+                "Nie można usunąć ucznia, ponieważ są do niego przypisane oceny."
+            ]
+        ]
+        if not self.check_delete_is_possible(self.__db, check_data):
+            return
+
+        decision = messagebox.askquestion("Usuwanie rekordu",
+                                          f"Czy jesteś pewny że chcesz usunąć ucznia ('{self.__rows[id][0]}')  {self.__rows[id][1]} {self.__rows[id][2]}?")
+        if decision == "yes":
+            try:
+                self.__db.execute("DELETE FROM uczniowie WHERE pesel=?", [self.__rows[id][0]])
+                self.show_frame()
+            except Exception as e:
+                print(e)
+                messagebox.showerror("Błąd przy usuwaniu rekordu!", f"Niepowiodło się usunięcie '{self.__rows[id][0]}'")
