@@ -41,9 +41,27 @@ class Przedmioty(Methods):
                                                self.__add_przedmiot_to_db, "Dodaj przedmiot")
         frame.pack()
 
-
-
     def __frame_del_row(self, id: int):
+        check_data = [
+            [
+                "SELECT * FROM oceny WHERE przedmioty_nazwa=?",
+                [self.__rows[id][0]],
+                "Nie można usunąć przedmiotu, bo istnieją oceny z tego przedmiotu."
+            ],
+            [
+                "SELECT * FROM sprawdziany WHERE przedmioty_nazwa=?",
+                [self.__rows[id][0]],
+                "Nie można usunąć przedmiotu, bo instnieją zaplanowane sprawdziany z tego przedmiotu.."
+            ],
+            [
+                "SELECT * FROM zajecia WHERE przedmioty_nazwa=?",
+                [self.__rows[id][0]],
+                "Nie można usunąć przedmiotu, bo istnieją zajęcia z tego przedmiotu."
+            ]
+        ]
+        if not self.check_delete_is_possible(self.__db, check_data):
+            return
+
         decision = messagebox.askquestion("Usuwanie rekordu",
                                           f"Czy jesteś pewny że chcesz usunąć przedmiot '{self.__rows[id][0]}'?")
         if decision == "yes":
