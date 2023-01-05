@@ -74,8 +74,10 @@ class Sale(Methods):
                 print(e)
                 messagebox.showerror("Błąd przy dodanianiu sali!", "Niezidentyfikowany błąd")
 
-
-
     def __data_validation(self, list_data):
-        print(list_data)
+        list_data[0] = list_data[0].strip()
+        if not (
+            self.check_number(list_data[0], 4, 2, "Numer sali")
+        ):
+            return False
         return list_data

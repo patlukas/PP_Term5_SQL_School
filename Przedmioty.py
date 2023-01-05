@@ -57,6 +57,11 @@ class Przedmioty(Methods):
                 "SELECT * FROM zajecia WHERE przedmioty_nazwa=?",
                 [self.__rows[id][0]],
                 "Nie można usunąć przedmiotu, bo istnieją zajęcia z tego przedmiotu."
+            ],
+            [
+                "SELECT * FROM nauczyciele_przedmioty WHERE przedmiot_nazwa=?",
+                [self.__rows[id][0]],
+                "Nie można usunąć przedmiotu, bo jest przypisany do nauczyciela uczącego."
             ]
         ]
         if not self.check_delete_is_possible(self.__db, check_data):
@@ -85,5 +90,10 @@ class Przedmioty(Methods):
                 messagebox.showerror("Błąd przy dodanianie przedmiotu!", "Niezydentyfikowany błąd")
 
     def __data_validation(self, list_data):
-        print(list_data)
+        list_data[0] = list_data[0].strip()
+
+        if not (
+                self.check_varchar2(list_data[0], 20, "przedmiotu")
+        ):
+            return False
         return list_data

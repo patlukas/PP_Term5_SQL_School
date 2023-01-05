@@ -64,7 +64,9 @@ class Klasy(Methods):
         for x in self.__window.winfo_children():
             x.destroy()
         list_teacher_name = [teacher[1] for teacher in self.__list_teacher]
-        frame = self._create_frame_edit_or_add(self.__window, "Edycja klasy", self.__list_labels, self.__rows[id],
+        frame = self._create_frame_edit_or_add(self.__window, "Edycja klasy",
+                                               self.__list_labels,
+                                               self.__rows[id],
                                                [None, None, list_teacher_name],
                                                self.__edit_row_in_db, "Edytuj klasę")
         frame.pack()

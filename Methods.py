@@ -92,7 +92,7 @@ class Methods:
 
     def check_varchar2(self, data, max_length, name, optional=False) -> bool:
         if len(data) > max_length:
-            messagebox.showerror(f"Błędna wartość {name}", f"Długość {name} musi być dłuższa niż {max_length}")
+            messagebox.showerror(f"Błędna wartość {name}", f"Długość {name} nie może być dłuższa niż {max_length}")
             return False
         elif len(data) == 0 and not optional:
             messagebox.showerror(f"Błędna wartość {name}", f"{name} jest obowiązkowa")
