@@ -5,6 +5,7 @@ from Sale import Sale
 from Pracownicy import Pracownicy
 from Przedmioty import Przedmioty
 from NauczycielePrzedmioty import NauczycielePrzedmioty
+from Zajecia import Zajecia
 import sqlite3
 
 
@@ -17,6 +18,7 @@ def main():
     main_gui.add_option("Sale", Sale(main_gui.window, db).show_frame)
     main_gui.add_option("Przedmioty", Przedmioty(main_gui.window, db).show_frame)
     main_gui.add_option("Przedmioty nauczycieli", NauczycielePrzedmioty(main_gui.window, db).show_frame)
+    main_gui.add_option("Zajęcia", Zajecia(main_gui.window, db).show_frame)
     main_gui.add_option("opcja 5", lambda: print("Cześć jestem 5"))
     main_gui.add_option("opcja 6", lambda: print("Cześć jestem 6"))
     main_gui.start_gui()
