@@ -70,18 +70,19 @@ class Uczniowie(Methods):
                 messagebox.showerror("Błąd przy dodanianiu ucznia!", "Niezydentyfikowany błąd")
 
     def __data_validation(self, list_data):
-        klasa_nazwa_rocznik = list_data.pop().split(' ')
-        list_data.append(klasa_nazwa_rocznik[0])
-        list_data.append(klasa_nazwa_rocznik[1])
-
+        # print(list_data)
+        # print("klasy:", self.__klasy)
         if not (
             self.check_pesel(list_data[0]) and
             self.check_date(list_data[3], "Data urodzenia") and
             self.check_varchar2(list_data[1], 30, "imie") and
-            self.check_varchar2(list_data[2], 30, "nazwisko")
+            self.check_varchar2(list_data[2], 30, "nazwisko") and
+            self.check_value_from_list(list_data[4], self.__klasy, "klasa")
         ):
             return False
-
+        klasa_nazwa_rocznik = list_data.pop().split(' ')
+        list_data.append(klasa_nazwa_rocznik[0])
+        list_data.append(klasa_nazwa_rocznik[1])
         return list_data
 
     def __frame_edit_row(self, id: int):
