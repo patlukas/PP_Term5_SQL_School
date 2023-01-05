@@ -41,8 +41,17 @@ class Sale(Methods):
                                                self.__add_sala_to_db, "Dodaj sale")
         frame.pack()
 
-
     def __frame_del_row(self, id: int):
+        check_data = [
+            [
+                "SELECT * FROM zajecia WHERE sale_numer=?",
+                [self.__rows[id][0]],
+                "Nie można usunąć sali, ponieważ są w niej przeprowadzane zajęcia."
+            ]
+        ]
+        if not self.check_delete_is_possible(self.__db, check_data):
+            return
+
         decision = messagebox.askquestion("Usuwanie rekordu",
                                           f"Czy jesteś pewny że chcesz usunąć sale o numerze '{self.__rows[id][0]}'?")
         if decision == "yes":
@@ -60,10 +69,10 @@ class Sale(Methods):
                 self.__db.execute("INSERT INTO sale VALUES(?)", list_data)
                 self.show_frame()
             except sqlite3.IntegrityError:
-                messagebox.showerror("Błąd przy dodanianie sali!", "Nazwa sali musi być unikalna")
+                messagebox.showerror("Błąd przy dodanianiu sali!", "Nazwa sali musi być unikalna")
             except Exception as e:
                 print(e)
-                messagebox.showerror("Błąd przy dodanianie sali!", "Niezydentyfikowany błąd")
+                messagebox.showerror("Błąd przy dodanianiu sali!", "Niezidentyfikowany błąd")
 
 
 
