@@ -7,6 +7,28 @@ import sqlite3
 
 
 class Methods:
+    def _create_main_frame(self, db, window, title, title_btn_add, labels, rows, frame_add, frame_edit, frame_del):
+        db.commit()
+        for x in window.winfo_children():
+            x.destroy()
+        frame = tk.Frame(master=window)
+        tk.Label(master=frame, text=title).pack()
+        self._create_table(frame, labels, rows, frame_edit, frame_del).pack()
+        tk.Button(master=frame, text=title_btn_add, command=frame_add).pack()
+        return frame
+
+    def _create_add_frame(self, window, title, name_btn_add, labels, type_columns, on_add, on_back):
+        for x in window.winfo_children():
+            x.destroy()
+        frame = self._create_frame_edit_or_add(window, title, labels, None, type_columns, on_add, name_btn_add, on_back)
+        return frame
+
+    def _create_edit_frame(self, window, title, name_btn_add, labels, values, type_columns, on_add, on_back):
+        for x in window.winfo_children():
+            x.destroy()
+        frame = self._create_frame_edit_or_add(window, title, labels, values, type_columns, on_add, name_btn_add, on_back)
+        return frame
+
     def _create_table(self, master, labels, rows, on_edit, on_del):
         table = ttk.Treeview(master=master)
         table['columns'] = labels
