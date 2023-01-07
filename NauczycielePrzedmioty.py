@@ -21,12 +21,9 @@ class NauczycielePrzedmioty(Methods):
         for x in self.__window.winfo_children():
             x.destroy()
         frame = tk.Frame(master=self.__window)
-        label = tk.Label(master=frame, text="Przedmioty nauczycieli")
-        table = self._create_table(frame, self.__list_labels, self.__rows, None, self.__frame_del_row)
-        button = tk.Button(master=frame, text="Dodaj nauczycielowi przedmiot", command=self.__frame_add)
-        label.pack()
-        table.pack()
-        button.pack()
+        tk.Label(master=frame, text="Przedmioty nauczycieli").pack()
+        self._create_table(frame, self.__list_labels, self.__rows, None, self.__frame_del_row).pack()
+        tk.Button(master=frame, text="Dodaj nauczycielowi przedmiot", command=self.__frame_add).pack()
         frame.pack()
 
     def __get_rows_data(self):
@@ -83,7 +80,7 @@ class NauczycielePrzedmioty(Methods):
             [
                 "SELECT * FROM oceny WHERE Nauczyciele_pesel=? AND Przedmioty_nazwa=?",
                 [self.__get_teacher_pesel(self.__rows[id][0]), self.__rows[id][1]],
-                "Nie można usunąć przedmiotu nauczycielowi, bo istnieje pracownik zatrudniony na tym etacie"
+                "Nie można usunąć przedmiotu nauczycielowi, bo istnieje ocena wystawiona z tego przedmiotu przez tego nauczyciela"
             ],
             [
                 "SELECT * FROM sprawdziany WHERE Nauczyciele_pesel=? AND Przedmioty_nazwa=?",
@@ -111,7 +108,6 @@ class NauczycielePrzedmioty(Methods):
                 self.__db.rollback()
 
     def __data_validation(self, list_data):
-        print(list_data, self.__list_przedmioty)
         if not (
             self.check_value_from_list(list_data[0], self.__get_list_teacher_name(), "Nauczyciel") and
             self.check_value_from_list(list_data[1], self.__list_przedmioty, "Przedmiot")
