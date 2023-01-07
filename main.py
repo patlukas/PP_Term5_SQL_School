@@ -8,6 +8,7 @@ from NauczycielePrzedmioty import NauczycielePrzedmioty
 from Zajecia import Zajecia
 from Uczniowie import Uczniowie
 from Lekcje import Lekcje
+from Oceny import Oceny
 import sqlite3
 
 
@@ -23,6 +24,7 @@ def main():
     main_gui.add_option("Zajęcia", Zajecia(main_gui.window, db).show_frame)
     main_gui.add_option("Uczniowie", Uczniowie(main_gui.window, db).show_frame)
     main_gui.add_option("Lekcje", Lekcje(main_gui.window, db).show_frame)
+    main_gui.add_option("Oceny", Oceny(main_gui.window, db).show_frame)
     main_gui.add_option("opcja 6", lambda: print("Cześć jestem 6"))
     main_gui.start_gui()
     db.close()
