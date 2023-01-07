@@ -38,7 +38,7 @@ class Przedmioty(Methods):
                                                ["Nazwa"],
                                                None,
                                                [str],
-                                               self.__add_przedmiot_to_db, "Dodaj przedmiot")
+                                               self.__add_przedmiot_to_db, "Dodaj przedmiot", self.show_frame)
         frame.pack()
 
     def __frame_del_row(self, id: int):

@@ -57,7 +57,7 @@ class Klasy(Methods):
         list_teacher_name = [teacher[1] for teacher in self.__list_teacher]
         frame = self._create_frame_edit_or_add(self.__window, "Dodanie klasy", self.__list_labels, None,
                                                [str, self.__list_rocznik, list_teacher_name],
-                                               self.__add_klasa_to_db, "Stwórz klasę")
+                                               self.__add_klasa_to_db, "Stwórz klasę", self.show_frame)
         frame.pack()
 
     def __frame_edit_row(self, id: int):
@@ -68,7 +68,7 @@ class Klasy(Methods):
                                                self.__list_labels,
                                                self.__rows[id],
                                                [None, None, list_teacher_name],
-                                               self.__edit_row_in_db, "Edytuj klasę")
+                                               self.__edit_row_in_db, "Edytuj klasę", self.show_frame)
         frame.pack()
 
     def __frame_del_row(self, id: int):

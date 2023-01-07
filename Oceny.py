@@ -67,7 +67,7 @@ class Oceny(Methods):
                                                [self.__get_list_klas_and_uczen_title(),
                                                 self.__get_list_przedmiot_and_teacher_title(),
                                                 str, self.__list_ocen, self.__list_wag, str],
-                                               self.__add_to_db, "Dodaj ocenę")
+                                               self.__add_to_db, "Dodaj ocenę", self.show_frame)
         frame.pack()
 
     def __add_to_db(self, list_data: list[str]):
@@ -92,7 +92,8 @@ class Oceny(Methods):
                                                [self.__get_list_klas_and_uczen_title(),
                                                 self.__get_list_przedmiot_and_teacher_title(),
                                                 str, self.__list_ocen, self.__list_wag, str],
-                                               lambda list_data: self.__edit_row_in_db(list_data, index), "Edytuj ocenę")
+                                               lambda list_data: self.__edit_row_in_db(list_data, index), "Edytuj ocenę",
+                                               self.show_frame)
         frame.pack()
 
     def __edit_row_in_db(self, list_data, index):

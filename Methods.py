@@ -39,7 +39,7 @@ class Methods:
         else:
             pass
 
-    def _create_frame_edit_or_add(self, master, title, labels, values, types: list, on_click, button_label):
+    def _create_frame_edit_or_add(self, master, title, labels, values, types: list, on_click, button_label, on_back):
         """
         :param types: każdy element listy odpowiada jednej kolumnie, jeżeli
                         - None - wartość nie zmienialna (Label)
@@ -75,7 +75,12 @@ class Methods:
 
         tk.Label(master=frame, text=title).grid(row=0, column=0, columnspan=len(list_label_el))
         button = tk.Button(master=frame, text=button_label, command=lambda: on_click(self.__get_list_str_from_list_el(list_input_el)))
+        button_back = tk.Button(master=frame, text="Powrót", command=on_back)
         button.grid(row=3, column=len(list_label_el)-1)
+        if len(list_label_el) == 1:
+            button_back.grid(row=4, column=0)
+        else:
+            button_back.grid(row=3, column=0)
         return frame
 
     @staticmethod

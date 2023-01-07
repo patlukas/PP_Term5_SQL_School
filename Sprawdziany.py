@@ -65,7 +65,7 @@ class Sprawdziany(Methods):
                                                self.__list_labels, None,
                                                [self.__get_list_klasy_full_name(),
                                                 self.__get_list_string_przedmioty_and_teacher(), str, str],
-                                               self.__add_to_db, "Stwórz sprawdzian")
+                                               self.__add_to_db, "Stwórz sprawdzian", self.show_frame)
         frame.pack()
 
     def __add_to_db(self, list_data: list[str]):
@@ -90,7 +90,8 @@ class Sprawdziany(Methods):
                                                self.__list_labels, self.__rows[index],
                                                [self.__get_list_klasy_full_name(),
                                                 self.__get_list_string_przedmioty_and_teacher(), str, str],
-                                               lambda list_data: self.__edit_row_in_db(list_data, index), "Edytuj sprawdzian")
+                                               lambda list_data: self.__edit_row_in_db(list_data, index), "Edytuj sprawdzian",
+                                               self.show_frame)
         frame.pack()
 
     def __edit_row_in_db(self, list_data, index):

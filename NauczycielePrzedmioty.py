@@ -57,7 +57,8 @@ class NauczycielePrzedmioty(Methods):
             x.destroy()
         frame = self._create_frame_edit_or_add(self.__window, "Dodanie nauczycielowi kolejnego przedmiotu",
                                                self.__list_labels, None,
-                                               [self.__get_list_teacher_name(), self.__list_przedmioty], self.__add_to_db, "Stwórz")
+                                               [self.__get_list_teacher_name(), self.__list_przedmioty], self.__add_to_db, "Stwórz",
+                                               self.show_frame)
         frame.pack()
 
     def __add_to_db(self, list_data: list[str]):

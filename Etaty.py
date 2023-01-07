@@ -36,7 +36,7 @@ class Etaty(Methods):
             x.destroy()
         frame = self._create_frame_edit_or_add(self.__window, "Dodanie etatu",
                                                ["Nazwa etatu", "Płaca minimalna", "Płaca maksymalna"], None,
-                                               [str, str, str], self.__add_etat_to_db, "Stwórz etat")
+                                               [str, str, str], self.__add_etat_to_db, "Stwórz etat", self.show_frame)
         frame.pack()
 
     def __add_etat_to_db(self, list_data: list[str]):
@@ -58,7 +58,7 @@ class Etaty(Methods):
             x.destroy()
         frame = self._create_frame_edit_or_add(self.__window, "Edycja etatu",
                                                ["Nazwa etatu", "Płaca minimalna", "Płaca maksymalna"], self.__rows[id],
-                                               [None, str, str], self.__edit_row_in_db, "Edytuj etat")
+                                               [None, str, str], self.__edit_row_in_db, "Edytuj etat", self.show_frame)
         frame.pack()
 
     def __edit_row_in_db(self, list_data):
@@ -108,5 +108,3 @@ class Etaty(Methods):
             messagebox.showerror("Błędne wartości płac!", "Podane błędne wartości płac")
             return False
         return list_data
-
-

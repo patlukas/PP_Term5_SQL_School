@@ -50,7 +50,8 @@ class Lekcje(Methods):
         for x in self.__window.winfo_children():
             x.destroy()
         frame = self._create_frame_edit_or_add(self.__window, "Dodanie lekcji", self.__list_labels, None,
-                                               [self.__get_list_zajecia_title(), str, str], self.__add_to_db, "Stwórz")
+                                               [self.__get_list_zajecia_title(), str, str], self.__add_to_db, "Stwórz",
+                                               self.show_frame)
         frame.pack()
 
     def __add_to_db(self, list_data: list[str]):
@@ -71,7 +72,8 @@ class Lekcje(Methods):
             x.destroy()
         frame = self._create_frame_edit_or_add(self.__window, "Edycja lekcji", self.__list_labels, self.__rows[index],
                                                [self.__get_list_zajecia_title(), str, str],
-                                               lambda list_data: self.__edit_row_in_db(list_data, index), "Edytuj lekcje")
+                                               lambda list_data: self.__edit_row_in_db(list_data, index), "Edytuj lekcje",
+                                               self.show_frame)
         frame.pack()
 
     def __edit_row_in_db(self, list_data, index):

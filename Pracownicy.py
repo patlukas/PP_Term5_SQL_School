@@ -53,7 +53,7 @@ class Pracownicy(Methods):
             x.destroy()
         frame = self._create_frame_edit_or_add(self.__window, "Dodanie pracownika", self.__list_labels, None,
                                                [str, str, str, str, str, str, self.__list_etat, bool],
-                                               self.__add_pracownik_to_db, "Stwórz pracownika")
+                                               self.__add_pracownik_to_db, "Stwórz pracownika", self.show_frame)
         frame.pack()
 
     def __frame_edit_row(self, id: int):
@@ -61,7 +61,7 @@ class Pracownicy(Methods):
             x.destroy()
         frame = self._create_frame_edit_or_add(self.__window, "Edycja pracownika", self.__list_labels, self.__rows[id],
                                                [None, str, str, str, str, str, self.__list_etat, bool],
-                                               self.__edit_row_in_db, "Edytuj pracownika")
+                                               self.__edit_row_in_db, "Edytuj pracownika", self.show_frame)
         frame.pack()
 
     def __frame_del_row(self, id: int):

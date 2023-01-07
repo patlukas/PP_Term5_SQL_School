@@ -79,7 +79,7 @@ class Zajecia(Methods):
                                                self.__list_labels, None,
                                                [self.__get_list_klasy_full_name(), self.__list_day, self.__list_hour,
                                                 self.__list_sale, self.__get_list_string_przedmioty_and_teacher()],
-                                               self.__add_to_db, "Stwórz")
+                                               self.__add_to_db, "Stwórz", self.show_frame)
         frame.pack()
 
     def __add_to_db(self, list_data: list[str]):
@@ -118,7 +118,8 @@ class Zajecia(Methods):
                                                self.__list_labels, self.__rows[index],
                                                [self.__get_list_klasy_full_name(), self.__list_day, self.__list_hour,
                                                 self.__list_sale, self.__get_list_string_przedmioty_and_teacher()],
-                                               lambda list_data: self.__edit_row_in_db(list_data, index), "Edytuj zajęcia")
+                                               lambda list_data: self.__edit_row_in_db(list_data, index), "Edytuj zajęcia",
+                                               self.show_frame)
         frame.pack()
 
     def __edit_row_in_db(self, list_data, index):
