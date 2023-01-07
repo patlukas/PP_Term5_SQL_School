@@ -9,32 +9,25 @@ class Oceny(Methods):
         self.__window = window
         self.__db = db
         self.__list_labels = ["Klasa | Uczeń", "Przedmiot (Nauczyciel)", "Data", "Ocena", "Waga", "Opis"]
-        self.__list_przedmiot_and_teacher = self.__get_list_przedmiot_and_teacher()
-        self.__list_uczniowie = self.__get_list_uczniowie()
         self.__list_ocen = ["1", "2", "3", "4", "5", "6"]
         self.__list_wag = ["1", "2", "3", "4", "5"]
+        self.__list_przedmiot_and_teacher = []
+        self.__list_uczniowie = []
         self.__list_id = []
         self.__rows = []
 
     def show_frame(self) -> None:
-        self.__db.commit()
         self.__list_przedmiot_and_teacher = self.__get_list_przedmiot_and_teacher()
         self.__list_uczniowie = self.__get_list_uczniowie()
         self.__rows, self.__list_id = self.__get_rows_data()
-        for x in self.__window.winfo_children():
-            x.destroy()
-        frame = tk.Frame(master=self.__window)
-        tk.Label(master=frame, text="Oceny").pack()
-        self._create_table(frame, self.__list_labels, self.__rows, self.__frame_edit, self.__frame_del_row).pack()
-        tk.Button(master=frame, text="Dodaj nową ocenę", command=self.__frame_add).pack()
-        frame.pack()
+        self._create_main_frame(self.__db, self.__window, "Oceny", "Dodaj nową ocenę", self.__list_labels, self.__rows,
+                                self.__frame_add, self.__frame_edit, self.__frame_del).pack()
 
     def __get_rows_data(self):
         cur = self.__db.cursor()
         cur.execute("SELECT * FROM oceny")
-        rows_read = cur.fetchall()
         rows, list_id = [], []
-        for row in rows_read:
+        for row in cur.fetchall():
             przedmiot_and_teacher = ""
             for przedmiot_name, teacher_pesel, teacher_name, full_name in self.__list_przedmiot_and_teacher:
                 if row[7] == teacher_pesel and row[6] == przedmiot_name:
@@ -60,15 +53,10 @@ class Oceny(Methods):
         return [[el[0], f"{el[3]} {el[4]} | {el[2]} {el[1]} ({el[0]})"] for el in cur.fetchall()]
 
     def __frame_add(self):
-        for x in self.__window.winfo_children():
-            x.destroy()
-        frame = self._create_frame_edit_or_add(self.__window, "Dodanie oceny",
-                                               self.__list_labels, None,
-                                               [self.__get_list_klas_and_uczen_title(),
-                                                self.__get_list_przedmiot_and_teacher_title(),
-                                                str, self.__list_ocen, self.__list_wag, str],
-                                               self.__add_to_db, "Dodaj ocenę", self.show_frame)
-        frame.pack()
+        self._create_add_frame(self.__window, "Dodanie oceny", "Dodaj ocenę", self.__list_labels,
+                               [self.__get_list_klas_and_uczen_title(),
+                                self.__get_list_przedmiot_and_teacher_title(), str, self.__list_ocen,
+                                self.__list_wag, str], self.__add_to_db, self.show_frame).pack()
 
     def __add_to_db(self, list_data: list[str]):
         list_data = self.__data_validation(list_data)
@@ -85,16 +73,10 @@ class Oceny(Methods):
                 self.__db.rollback()
 
     def __frame_edit(self, index: int):
-        for x in self.__window.winfo_children():
-            x.destroy()
-        frame = self._create_frame_edit_or_add(self.__window, "Edycja oceny",
-                                               self.__list_labels, self.__rows[index],
-                                               [self.__get_list_klas_and_uczen_title(),
-                                                self.__get_list_przedmiot_and_teacher_title(),
-                                                str, self.__list_ocen, self.__list_wag, str],
-                                               lambda list_data: self.__edit_row_in_db(list_data, index), "Edytuj ocenę",
-                                               self.show_frame)
-        frame.pack()
+        self._create_edit_frame(self.__window, "Edycja oceny", "Edytuj ocenę", self.__list_labels, self.__rows[index],
+                                [self.__get_list_klas_and_uczen_title(), self.__get_list_przedmiot_and_teacher_title(),
+                                 str, self.__list_ocen, self.__list_wag, str],
+                                lambda list_data: self.__edit_row_in_db(list_data, index), self.show_frame).pack()
 
     def __edit_row_in_db(self, list_data, index):
         list_data = self.__data_validation(list_data)
@@ -111,7 +93,7 @@ class Oceny(Methods):
                 messagebox.showerror("Błąd przy edycji oceny!", "Niezydentyfikowany błąd")
                 self.__db.rollback()
 
-    def __frame_del_row(self, index: int):
+    def __frame_del(self, index: int):
         decision = messagebox.askquestion("Usuwanie rekordu", f"Czy jesteś pewny że chcesz usunąć ocenę?")
         if decision == "yes":
             try:
