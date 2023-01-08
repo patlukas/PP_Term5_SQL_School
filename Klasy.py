@@ -12,67 +12,41 @@ class Klasy(Methods):
         self.__list_labels = ["Nazwa", "Rocznik", "Wychowawca"]
         self.__list_teacher = []
         self.__rows = []
-        current_year = date.today().year
-        self.__list_rocznik = [f"{r}/{r + 1}" for r in range(current_year, 2000, -1)]
+        self.__list_rocznik = [f"{r}/{r + 1}" for r in range(date.today().year, 2000, -1)]
 
     def show_frame(self) -> None:
-        self.__db.commit()
         self.__list_teacher = self.__get_list_teacher()
         self.__rows = self.__get_rows_data()
-        for x in self.__window.winfo_children():
-            x.destroy()
-        frame = tk.Frame(master=self.__window)
-        label = tk.Label(master=frame, text="Klasy")
-        table = self._create_table(frame, self.__list_labels, self.__rows, self.__frame_edit_row, self.__frame_del_row)
-        button = tk.Button(master=frame, text="Dodaj klasę", command=self.__frame_add_klasa)
-        label.pack()
-        table.pack()
-        button.pack()
-        frame.pack()
+        self._create_main_frame(self.__db, self.__window, "Klasy", "Dodaj klasę", self.__list_labels, self.__rows,
+                                self.__frame_add, self.__frame_edit, self.__frame_del).pack()
 
     def __get_rows_data(self):
         cur = self.__db.cursor()
         cur.execute("SELECT * FROM klasy")
-        rows_klasy = cur.fetchall()
         rows = []
-        for nazwa, wychowawca_pesel, rocznik in rows_klasy:
-            wychowawca = ""
-            for nauczyciel_pesel, nauczyciel in self.__list_teacher:
-                if nauczyciel_pesel == wychowawca_pesel:
-                    wychowawca = nauczyciel
-                    break
+        for nazwa, wychowawca_pesel, rocznik in cur.fetchall():
+            wychowawca = self.__get_teacher_name_by_pesel(wychowawca_pesel)
             rows.append([nazwa, rocznik, wychowawca])
         return rows
 
     def __get_list_teacher(self):
         cur = self.__db.cursor()
-        cur.execute("SELECT p.pesel, p.nazwisko || ' ' || p.imie FROM nauczyciele n JOIN pracownicy p ON n.pesel = p.pesel")
-        list_rows_from_db = cur.fetchall()
-        rows = [[pesel, nazwa+" ("+pesel+")"] for pesel, nazwa in list_rows_from_db]
-        return rows
+        cur.execute("SELECT p.pesel, p.nazwisko, p.imie FROM nauczyciele n JOIN pracownicy p ON n.pesel = p.pesel")
+        return [[pesel, f"{nazwisko} {imie} ({pesel})"] for pesel, nazwisko, imie in cur.fetchall()]
 
-    def __frame_add_klasa(self):
-        for x in self.__window.winfo_children():
-            x.destroy()
+    def __frame_add(self):
         list_teacher_name = [teacher[1] for teacher in self.__list_teacher]
-        frame = self._create_frame_edit_or_add(self.__window, "Dodanie klasy", self.__list_labels, None,
-                                               [str, self.__list_rocznik, list_teacher_name],
-                                               self.__add_klasa_to_db, "Stwórz klasę")
-        frame.pack()
+        self._create_add_frame(self.__window, "Dodawanie klasy", "Dodaj klasę", self.__list_labels,
+                               [str, self.__list_rocznik, list_teacher_name], self.__add_to_db, self.show_frame).pack()
 
-    def __frame_edit_row(self, id: int):
-        for x in self.__window.winfo_children():
-            x.destroy()
+    def __frame_edit(self, index: int):
         list_teacher_name = [teacher[1] for teacher in self.__list_teacher]
-        frame = self._create_frame_edit_or_add(self.__window, "Edycja klasy",
-                                               self.__list_labels,
-                                               self.__rows[id],
-                                               [None, None, list_teacher_name],
-                                               self.__edit_row_in_db, "Edytuj klasę")
-        frame.pack()
+        self._create_edit_frame(self.__window, "Edycja klasy", "Edytuj klasę", self.__list_labels, self.__rows[index],
+                                [str, self.__list_rocznik, list_teacher_name],
+                                lambda data: self.__edit_row_in_db(data, index), self.show_frame).pack()
 
-    def __frame_del_row(self, id: int):
-        arg = [self.__rows[id][0], self.__rows[id][1]]
+    def __frame_del(self, index: int):
+        arg = [self.__rows[index][0], self.__rows[index][1]]
         check_data = [
             [
                 "SELECT * FROM uczniowie WHERE Klasy_nazwa=? AND Klasy_rocznik=?", arg,
@@ -101,12 +75,12 @@ class Klasy(Methods):
                 messagebox.showerror("Błąd przy usuwaniu rekordu!", f"Niepowiodło się usunięcie klasy o nazwie '{arg[0]}' z rocznika {arg[1]}")
                 self.__db.rollback()
 
-    def __add_klasa_to_db(self, list_data: list[str]):
+    def __add_to_db(self, list_data: list[str]):
         list_data = self.__data_validation(list_data)
 
         if list_data is not False:
             try:
-                pesel = self.__get_teacher_pesel(list_data[2])
+                pesel = self.__get_teacher_pesel_by_name(list_data[2])
                 self.__db.execute("INSERT INTO klasy VALUES(?, ?, ?)", [list_data[0], pesel, list_data[1]])
                 self.show_frame()
             except sqlite3.IntegrityError:
@@ -117,19 +91,35 @@ class Klasy(Methods):
                 messagebox.showerror("Błąd przy dodanianie klasy!", "Niezydentyfikowany błąd")
                 self.__db.rollback()
 
-    def __edit_row_in_db(self, list_data):
+    def __edit_row_in_db(self, list_data, index):
         list_data = self.__data_validation(list_data)
         if list_data is not False:
             try:
-                pesel = self.__get_teacher_pesel(list_data[2])
+                pesel = self.__get_teacher_pesel_by_name(list_data[2])
                 self.__db.execute(
-                    "UPDATE klasy SET nauczyciele_pesel=? WHERE nazwa=? AND rocznik=?",
-                    [pesel, list_data[0], list_data[1]]
+                    "UPDATE klasy SET nazwa=?, rocznik=?, nauczyciele_pesel=? WHERE nazwa=? AND rocznik=?",
+                    [list_data[0], list_data[1], pesel, self.__rows[index][0], self.__rows[index][1]]
+                )
+                self.__db.execute(
+                    "UPDATE zajecia SET klasy_nazwa=?, klasy_rocznik=? WHERE klasy_nazwa=? AND klasy_rocznik=?",
+                    [list_data[0], list_data[1], self.__rows[index][0], self.__rows[index][1]]
+                )
+                self.__db.execute(
+                    "UPDATE uczniowie SET klasy_nazwa=?, klasy_rocznik=? WHERE klasy_nazwa=? AND klasy_rocznik=?",
+                    [list_data[0], list_data[1], self.__rows[index][0], self.__rows[index][1]]
+                )
+                self.__db.execute(
+                    "UPDATE sprawdziany SET klasy_nazwa=?, klasy_rocznik=? WHERE klasy_nazwa=? AND klasy_rocznik=?",
+                    [list_data[0], list_data[1], self.__rows[index][0], self.__rows[index][1]]
                 )
                 self.show_frame()
+            except sqlite3.IntegrityError:
+                messagebox.showerror("Błąd przy edycji klasy!", "Już istnieje klasa z taką nazwą w wybranym roczniku")
+                self.__db.rollback()
             except Exception as e:
                 print(e)
                 messagebox.showerror("Błąd przy edycji klasy!", "Niezydentyfikowany błąd")
+                self.__db.rollback()
 
     def __data_validation(self, list_data):
         list_nauczyciel_name = [name for _, name in self.__list_teacher]
@@ -141,8 +131,14 @@ class Klasy(Methods):
             return False
         return list_data
 
-    def __get_teacher_pesel(self, wychowawca_name) -> str:
+    def __get_teacher_pesel_by_name(self, wychowawca_name) -> str:
         for nauczyciel_pesel, nauczyciel_name in self.__list_teacher:
             if wychowawca_name == nauczyciel_name:
                 return nauczyciel_pesel
+        return ""
+
+    def __get_teacher_name_by_pesel(self, pesel):
+        for nauczyciel_pesel, nauczyciel in self.__list_teacher:
+            if nauczyciel_pesel == pesel:
+                return nauczyciel
         return ""

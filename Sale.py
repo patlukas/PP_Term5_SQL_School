@@ -16,7 +16,7 @@ class Sale(Methods):
         for x in self.__window.winfo_children():
             x.destroy()
         frame = tk.Frame(master=self.__window)
-        label = tk.Label(master=frame, text="Etaty")
+        label = tk.Label(master=frame, text="Sale")
         table = self._create_table(frame, ["Nuner sali"], self.__rows,
                                    None, self.__frame_del_row)
         button = tk.Button(master=frame, text="Dodaj sale", command=self.__frame_add_sala)
@@ -34,11 +34,12 @@ class Sale(Methods):
     def __frame_add_sala(self):
         for x in self.__window.winfo_children():
             x.destroy()
+
         frame = self._create_frame_edit_or_add(self.__window, "Dodanie nowej sali",
                                                ["Numer sali"],
                                                None,
                                                [str],
-                                               self.__add_sala_to_db, "Dodaj sale")
+                                               self.__add_sala_to_db, "Dodaj sale", self.show_frame)
         frame.pack()
 
     def __frame_del_row(self, id: int):

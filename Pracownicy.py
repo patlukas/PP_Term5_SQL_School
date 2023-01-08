@@ -19,70 +19,54 @@ class Pracownicy(Methods):
         self.__list_etat_row = self.__get_list_etat_row()
         self.__list_etat = [row[0] for row in self.__list_etat_row]
         self.__rows = self.__get_rows_data()
-        for x in self.__window.winfo_children():
-            x.destroy()
-        frame = tk.Frame(master=self.__window)
-        label = tk.Label(master=frame, text="Pracownicy")
-        table = self._create_table(frame, self.__list_labels, self.__rows, self.__frame_edit_row, self.__frame_del_row)
-        button = tk.Button(master=frame, text="Dodaj etat", command=self.__frame_add_etat)
-        label.pack()
-        table.pack()
-        button.pack()
-        frame.pack()
+        self._create_main_frame(self.__db, self.__window, "Pracownicy", "Dodaj etat", self.__list_labels, self.__rows,
+                                self.__frame_add, self.__frame_edit_row, self.__frame_del_row).pack()
 
     def __get_rows_data(self):
         cur = self.__db.cursor()
         cur.execute("SELECT * FROM pracownicy")
         rows_pracownicy = cur.fetchall()
         cur.execute("SELECT pesel FROM nauczyciele")
-        rows_nauczyciele = cur.fetchall()
-        nauczyciele = [nauczyciel[0] for nauczyciel in rows_nauczyciele]
+        nauczyciele = [nauczyciel[0] for nauczyciel in cur.fetchall()]
         rows = []
-        for i in range(len(rows_pracownicy)):
-            rows.append(list(rows_pracownicy[i]) + [rows_pracownicy[i][0] in nauczyciele])
+        for pracownik in rows_pracownicy:
+            rows.append(list(pracownik) + [pracownik[0] in nauczyciele])
         return rows
 
     def __get_list_etat_row(self):
         cur = self.__db.cursor()
         cur.execute("SELECT * FROM etaty")
-        rows = cur.fetchall()
-        return rows
+        return cur.fetchall()
 
-    def __frame_add_etat(self):
-        for x in self.__window.winfo_children():
-            x.destroy()
-        frame = self._create_frame_edit_or_add(self.__window, "Dodanie pracownika", self.__list_labels, None,
-                                               [str, str, str, str, str, str, self.__list_etat, bool],
-                                               self.__add_pracownik_to_db, "Stwórz pracownika")
-        frame.pack()
+    def __frame_add(self):
+        self._create_add_frame(self.__window, "Dodanie pracownika", "Stwórz pracownika", self.__list_labels,
+                               [str, str, str, str, str, str, self.__list_etat, bool], self.__add_to_db, self.show_frame
+                               ).pack()
 
-    def __frame_edit_row(self, id: int):
-        for x in self.__window.winfo_children():
-            x.destroy()
-        frame = self._create_frame_edit_or_add(self.__window, "Edycja pracownika", self.__list_labels, self.__rows[id],
-                                               [None, str, str, str, str, str, self.__list_etat, bool],
-                                               self.__edit_row_in_db, "Edytuj pracownika")
-        frame.pack()
+    def __frame_edit_row(self, index: int):
+        self._create_edit_frame(self.__window, "Edycja pracownika", "Edytuj pracownika", self.__list_labels,
+                                self.__rows[index], [None, str, str, str, str, str, self.__list_etat, bool],
+                                self.__edit_row_in_db, self.show_frame).pack()
 
-    def __frame_del_row(self, id: int):
-        if self.__check_teacher_is_used(self.__rows[id][0], "Nie można usunąć pracownika z rolą nauczyciela"):
+    def __frame_del_row(self, index: int):
+        pesel = self.__rows[index][0]
+        if self.__check_teacher_is_used(pesel, "Nie można usunąć pracownika z rolą nauczyciela"):
             return
 
         decision = messagebox.askquestion("Usuwanie rekordu",
-                                          f"Czy jesteś pewny że chcesz usunąć pracownika z peselem '{self.__rows[id][0]}'?")
+                                          f"Czy jesteś pewny że chcesz usunąć pracownika z peselem '{pesel}'?")
         if decision == "yes":
             try:
-                self.__db.execute("DELETE FROM pracownicy WHERE pesel=?", [self.__rows[id][0]])
-                self.__db.execute("DELETE FROM nauczyciele WHERE pesel=?", [self.__rows[id][0]])
+                self.__db.execute("DELETE FROM pracownicy WHERE pesel=?", [pesel])
+                self.__db.execute("DELETE FROM nauczyciele WHERE pesel=?", [pesel])
                 self.show_frame()
             except Exception as e:
                 print(e)
-                messagebox.showerror("Błąd przy usuwaniu rekordu!", f"Niepowiodło się usunięcie '{self.__rows[id][0]}'")
+                messagebox.showerror("Błąd przy usuwaniu rekordu!", f"Niepowiodło się usunięcie '{pesel}'")
                 self.__db.rollback()
 
-    def __add_pracownik_to_db(self, list_data: list[str]):
+    def __add_to_db(self, list_data: list[str]):
         list_data = self.__data_validation(list_data)
-
         if list_data is not False:
             try:
                 self.__db.execute("INSERT INTO pracownicy VALUES(?, ?, ?, ?, ?, ?, ?)", list_data[:-1])
@@ -135,8 +119,7 @@ class Pracownicy(Methods):
                 f"{message}, bo istnieją przedmioty do których jest przypisany jako nauczyciel"
             ],
             [
-                "SELECT * FROM Klasy WHERE Nauczyciele_pesel=?", [pesel],
-                f"{message}, bo jest wychowawca klasy"
+                "SELECT * FROM Klasy WHERE Nauczyciele_pesel=?", [pesel], f"{message}, bo jest wychowawca klasy"
             ],
             [
                 "SELECT * FROM Sprawdziany WHERE Nauczyciele_pesel=?", [pesel],
@@ -166,7 +149,6 @@ class Pracownicy(Methods):
         for etat_row in self.__list_etat_row:
             if etat_row[0] == list_data[6]:
                 if list_data[5] < float(etat_row[1]) or list_data[5] > float(etat_row[2]):
-                    messagebox.showerror("Błędna płaca!",
-                                         f"Płaca musi być z przedniału od {etat_row[1]} do {etat_row[2]}")
+                    messagebox.showerror("Błędna płaca!", f"Płaca musi być z przedniału od {etat_row[1]} do {etat_row[2]}")
                     return False
         return list_data

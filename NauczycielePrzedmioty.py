@@ -9,32 +9,22 @@ class NauczycielePrzedmioty(Methods):
         self.__window = window
         self.__db = db
         self.__list_labels = ["Nauczyciel", "Przedmiot"]
-        self.__list_przedmioty = self.__get_list_przedmioty()
-        self.__list_teacher = self.__get_list_teacher()
+        self.__list_przedmioty = []
+        self.__list_teacher = []
         self.__rows = []
 
     def show_frame(self) -> None:
-        self.__db.commit()
         self.__list_przedmioty = self.__get_list_przedmioty()
         self.__list_teacher = self.__get_list_teacher()
         self.__rows = self.__get_rows_data()
-        for x in self.__window.winfo_children():
-            x.destroy()
-        frame = tk.Frame(master=self.__window)
-        label = tk.Label(master=frame, text="Przedmioty nauczycieli")
-        table = self._create_table(frame, self.__list_labels, self.__rows, None, self.__frame_del_row)
-        button = tk.Button(master=frame, text="Dodaj nauczycielowi przedmiot", command=self.__frame_add)
-        label.pack()
-        table.pack()
-        button.pack()
-        frame.pack()
+        self._create_main_frame(self.__db, self.__window, "Przedmioty nauczycieli", "Dodaj nauczycielowi przedmiot",
+                                self.__list_labels, self.__rows, self.__frame_add, None, self.__frame_del).pack()
 
     def __get_rows_data(self):
         cur = self.__db.cursor()
         cur.execute("SELECT Nauczyciel_pesel, Przedmiot_nazwa FROM Nauczyciele_przedmioty ORDER BY Nauczyciel_pesel, Przedmiot_nazwa")
-        rows_read = cur.fetchall()
         rows = []
-        for nauczyciel_pesel, przedmiot_name in rows_read:
+        for nauczyciel_pesel, przedmiot_name in cur.fetchall():
             nauczyciel_name = ""
             for pesel, name in self.__list_teacher:
                 if nauczyciel_pesel == pesel:
@@ -51,17 +41,12 @@ class NauczycielePrzedmioty(Methods):
     def __get_list_teacher(self):
         cur = self.__db.cursor()
         cur.execute("SELECT p.pesel, p.nazwisko || ' ' || p.imie FROM nauczyciele n JOIN pracownicy p ON n.pesel = p.pesel")
-        list_rows_from_db = cur.fetchall()
-        rows = [[pesel, nazwa+" ("+pesel+")"] for pesel, nazwa in list_rows_from_db]
-        return rows
+        return [[pesel, nazwa+" ("+pesel+")"] for pesel, nazwa in cur.fetchall()]
 
     def __frame_add(self):
-        for x in self.__window.winfo_children():
-            x.destroy()
-        frame = self._create_frame_edit_or_add(self.__window, "Dodanie nauczycielowi kolejnego przedmiotu",
-                                               self.__list_labels, None,
-                                               [self.__get_list_teacher_name(), self.__list_przedmioty], self.__add_to_db, "Stwórz")
-        frame.pack()
+        self._create_add_frame(self.__window, "Dodanie nauczycielowi kolejnego przedmiotu", "Stwórz",
+                               self.__list_labels, [self.__get_list_teacher_name(), self.__list_przedmioty],
+                               self.__add_to_db, self.show_frame).pack()
 
     def __add_to_db(self, list_data: list[str]):
         list_data = self.__data_validation(list_data)
@@ -78,21 +63,19 @@ class NauczycielePrzedmioty(Methods):
                 messagebox.showerror("Błąd podczas dodawania!", "Niezydentyfikowany błąd")
                 self.__db.rollback()
 
-    def __frame_del_row(self, id: int):
+    def __frame_del(self, index: int):
+        arg = [self.__get_teacher_pesel(self.__rows[index][0]), self.__rows[index][1]]
         check_data = [
             [
-                "SELECT * FROM oceny WHERE Nauczyciele_pesel=? AND Przedmioty_nazwa=?",
-                [self.__get_teacher_pesel(self.__rows[id][0]), self.__rows[id][1]],
-                "Nie można usunąć przedmiotu nauczycielowi, bo istnieje pracownik zatrudniony na tym etacie"
+                "SELECT * FROM oceny WHERE Nauczyciele_pesel=? AND Przedmioty_nazwa=?", arg,
+                "Nie można usunąć przedmiotu nauczycielowi, bo istnieje ocena wystawiona z tego przedmiotu przez tego nauczyciela"
             ],
             [
-                "SELECT * FROM sprawdziany WHERE Nauczyciele_pesel=? AND Przedmioty_nazwa=?",
-                [self.__get_teacher_pesel(self.__rows[id][0]), self.__rows[id][1]],
+                "SELECT * FROM sprawdziany WHERE Nauczyciele_pesel=? AND Przedmioty_nazwa=?", arg,
                 "Nie można usunąć przedmiotu nauczycielowi, bo istnieje zaplanowany sprawdzian z tego przedmiotu przez tego naucyciela"
             ],
             [
-                "SELECT * FROM zajecia WHERE Nauczyciele_pesel=? AND Przedmioty_nazwa=?",
-                [self.__get_teacher_pesel(self.__rows[id][0]), self.__rows[id][1]],
+                "SELECT * FROM zajecia WHERE Nauczyciele_pesel=? AND Przedmioty_nazwa=?", arg,
                 "Nie można usunąć przedmiotu nauczycielowi, bo istnieją zajęcia z tego przedmiotu które prowadzi ten nauczyciel"
             ]
         ]
@@ -103,7 +86,7 @@ class NauczycielePrzedmioty(Methods):
         if decision == "yes":
             try:
                 self.__db.execute("DELETE FROM Nauczyciele_przedmioty WHERE  Nauczyciel_pesel=? AND Przedmiot_nazwa=?",
-                                  [self.__get_teacher_pesel(self.__rows[id][0]), self.__rows[id][1]])
+                                  [self.__get_teacher_pesel(self.__rows[index][0]), self.__rows[index][1]])
                 self.show_frame()
             except Exception as e:
                 print(e)
@@ -111,7 +94,6 @@ class NauczycielePrzedmioty(Methods):
                 self.__db.rollback()
 
     def __data_validation(self, list_data):
-        print(list_data, self.__list_przedmioty)
         if not (
             self.check_value_from_list(list_data[0], self.__get_list_teacher_name(), "Nauczyciel") and
             self.check_value_from_list(list_data[1], self.__list_przedmioty, "Przedmiot")
@@ -127,5 +109,3 @@ class NauczycielePrzedmioty(Methods):
             if teacher_name == nauczyciel_name:
                 return nauczyciel_pesel
         return ""
-
-

@@ -7,6 +7,9 @@ from Przedmioty import Przedmioty
 from NauczycielePrzedmioty import NauczycielePrzedmioty
 from Zajecia import Zajecia
 from Uczniowie import Uczniowie
+from Lekcje import Lekcje
+from Oceny import Oceny
+from Sprawdziany import Sprawdziany
 import sqlite3
 
 
@@ -21,24 +24,11 @@ def main():
     main_gui.add_option("Przedmioty nauczycieli", NauczycielePrzedmioty(main_gui.window, db).show_frame)
     main_gui.add_option("Zajęcia", Zajecia(main_gui.window, db).show_frame)
     main_gui.add_option("Uczniowie", Uczniowie(main_gui.window, db).show_frame)
-    main_gui.add_option("opcja 6", lambda: print("Cześć jestem 6"))
+    main_gui.add_option("Lekcje", Lekcje(main_gui.window, db).show_frame)
+    main_gui.add_option("Oceny", Oceny(main_gui.window, db).show_frame)
+    main_gui.add_option("Sprawdziany", Sprawdziany(main_gui.window, db).show_frame)
     main_gui.start_gui()
     db.close()
-
-
-# def create_db(db: sqlite3.Connection) -> None:
-#     db.execute("""DROP TABLE etaty""")
-#     db.execute("""
-#         CREATE TABLE etaty (
-#             nazwa     VARCHAR2(20) NOT NULL PRIMARY KEY,
-#             placa_min NUMBER(9, 2) NOT NULL,
-#             placa_max NUMBER(9, 2) NOT NULL
-#         );
-#     """)
-#     db.execute("""INSERT INTO etaty VALUES ('etat 1', 123.45, 678.90);""")
-#     db.execute("""INSERT INTO etaty VALUES ('etat 2', 246, 2468);""")
-#     db.execute("""INSERT INTO etaty VALUES ('etat 3', 333, 3333);""")
-#     db.commit()
 
 
 if __name__ == "__main__":

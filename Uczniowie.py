@@ -53,7 +53,7 @@ class Uczniowie(Methods):
                                                ["Pesel", "Imię", "Nazwisko", "Data urodzenia", "Klasa"],
                                                None,
                                                [str, str, str, str, self.__klasy],
-                                               self.__add_uczen_to_db, "Dodaj")
+                                               self.__add_uczen_to_db, "Dodaj", self.show_frame)
         frame.pack()
 
     def __add_uczen_to_db(self, list_data: list[str]):
@@ -92,7 +92,7 @@ class Uczniowie(Methods):
                                                ["Pesel", "Imię", "Nazwisko", "Data urodzenia", "Klasa"],
                                                self.__rows[id],
                                                [None, str, str, str, self.__klasy],
-                                               self.__edit_row_in_db, "Edytuj ucznia")
+                                               self.__edit_row_in_db, "Edytuj ucznia", self.show_frame)
         frame.pack()
 
     def __edit_row_in_db(self, list_data):
