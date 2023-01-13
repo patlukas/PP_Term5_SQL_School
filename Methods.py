@@ -86,10 +86,10 @@ class Methods:
             list_label_el.append(tk.Label(master=frame, text=label))
             text = "" if values is None else values[i]
             if types[i] == str:
-                list_input_widget.append(tk.Entry(master=frame))
+                list_input_widget.append(tk.Entry(master=frame, width=43))
                 list_input_widget[-1].insert(0, text)
             elif type(types[i]) == list:
-                list_input_widget.append(ttk.Combobox(master=frame, state="readonly", values=types[i]))
+                list_input_widget.append(ttk.Combobox(master=frame, state="readonly", values=types[i], width=40))
                 if text in types[i]:
                     list_input_widget[-1].current(types[i].index(text))
             elif types[i] == bool:
