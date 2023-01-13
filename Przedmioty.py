@@ -8,22 +8,15 @@ class Przedmioty(Methods):
     def __init__(self, window: tk.Frame, db: sqlite3.Connection):
         self.__window = window
         self.__db = db
+        self.__list_labels = ["Nazwa przedmiotu"]
+
         self.__rows = []
 
     def show_frame(self) -> None:
-        self.__db.commit()
         self.__rows = self.__get_rows_data()
-        for x in self.__window.winfo_children():
-            x.destroy()
-        frame = tk.Frame(master=self.__window)
-        label = tk.Label(master=frame, text="Przedmioty")
-        table = self._create_table(frame, ["Nazwa"], self.__rows,
-                                   None, self.__frame_del_row)
-        button = tk.Button(master=frame, text="Dodaj przedmiot", command=self.__frame_add_przedmiot)
-        label.pack()
-        table.pack()
-        button.pack()
-        frame.pack()
+
+        self._create_main_frame(self.__db, self.__window, "Przedmioty", "Dodaj przedmiot", self.__list_labels, self.__rows,
+                                self.__frame_add, None, self.__frame_del)
 
     def __get_rows_data(self):
         cur = self.__db.cursor()
@@ -31,17 +24,11 @@ class Przedmioty(Methods):
         rows = cur.fetchall()
         return rows
 
-    def __frame_add_przedmiot(self):
-        for x in self.__window.winfo_children():
-            x.destroy()
-        frame = self._create_frame_edit_or_add(self.__window, "Dodanie nowego przedmiotu",
-                                               ["Nazwa"],
-                                               None,
-                                               [str],
-                                               self.__add_przedmiot_to_db, "Dodaj przedmiot", self.show_frame)
-        frame.pack()
+    def __frame_add(self):
+        self._create_add_frame(self.__window, "Dodanie nowego przedmiotu", "Dodaj przedmiot", self.__list_labels, [str],
+                               self.__add_to_db, self.show_frame).pack()
 
-    def __frame_del_row(self, id: int):
+    def __frame_del(self, id: int):
         check_data = [
             [
                 "SELECT * FROM oceny WHERE przedmioty_nazwa=?",
@@ -77,7 +64,7 @@ class Przedmioty(Methods):
                 print(e)
                 messagebox.showerror("Błąd przy usuwaniu rekordu!", f"Niepowiodło się usunięcie '{self.__rows[id][0]}'")
 
-    def __add_przedmiot_to_db(self, list_data: list[str]):
+    def __add_to_db(self, list_data: list[str]):
         list_data = self.__data_validation(list_data)
         if list_data is not False:
             try:

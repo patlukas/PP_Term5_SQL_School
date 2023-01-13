@@ -12,10 +12,20 @@ class Methods:
         for x in window.winfo_children():
             x.destroy()
         frame = tk.Frame(master=window)
-        tk.Label(master=frame, text=title).pack()
-        self._create_table(frame, labels, rows, frame_edit, frame_del).pack()
-        tk.Button(master=frame, text=title_btn_add, command=frame_add).pack()
-        return frame
+        # frame["borderwidth"] = 5
+        # frame["relief"] = "groove"
+        tk.Label(master=frame, text=title).place(x=250, y=0, width=200)
+        table = self._create_table(frame, labels, rows, frame_edit, frame_del)
+        x_scroll = tk.Scrollbar(master=window, orient=tk.HORIZONTAL, command=table.xview)
+        y_scroll = tk.Scrollbar(master=window, orient=tk.VERTICAL, command=table.yview)
+        table.configure(xscroll=x_scroll.set, yscroll=y_scroll.set)
+        table.place(x=0, y=30, width=700, height=300)
+        x_scroll.place(x=0, y=320, width=700, height=15)
+        y_scroll.place(x=685, y=30, width=15, height=300)
+        tk.Button(master=frame, text=title_btn_add, command=frame_add).place(x=0, y=335)
+
+        frame.place(x=0, y=0, width=700, height=370)
+        # return frame
 
     def _create_add_frame(self, window, title, name_btn_add, labels, type_columns, on_add, on_back):
         for x in window.winfo_children():
@@ -31,18 +41,22 @@ class Methods:
 
     def _create_table(self, master, labels, rows, on_edit, on_del):
         table = ttk.Treeview(master=master)
+        # table.place(relx=0, rely=0, width=400)
         table['columns'] = labels
         table.column("#0", width=0, stretch=tk.NO)
         for i in range(len(labels)):
-            table.column(labels[i], anchor=tk.CENTER)
+            table.column(labels[i], anchor=tk.CENTER, width=100 + i*50)
             table.heading(labels[i], text=labels[i], anchor=tk.CENTER)
-        print(rows)
+        # print(rows)
         for i, row in enumerate(rows):
             val_row = []
             for one_val in row:
                 val_row.append(one_val if type(one_val) != bool else ("Tak" if one_val else "Nie"))
             table.insert(parent='', index='end', iid=i, text='', values=val_row)
         table.bind("<Button-3>", lambda x: self.__table_right_click(table, on_edit, on_del, x))
+        # scroll = tk.Scrollbar(master=master, orient=tk.VERTICAL, command=table.yview)
+        # table.configure(yscroll=scroll.set)
+        # scroll.grid(row=0, column=1, sticky='ns')
         return table
 
     @staticmethod
@@ -92,17 +106,17 @@ class Methods:
 
             if len(list_input_widget) != len(list_input_el):
                 list_input_el.append(list_input_widget[-1])
-            list_label_el[-1].grid(row=1, column=i)
-            list_input_widget[-1].grid(row=2, column=i)
+            list_label_el[-1].grid(row=i+1, column=1)
+            list_input_widget[-1].grid(row=i+1, column=2)
 
         tk.Label(master=frame, text=title).grid(row=0, column=0, columnspan=len(list_label_el))
         button = tk.Button(master=frame, text=button_label, command=lambda: on_click(self.__get_list_str_from_list_el(list_input_el)))
         button_back = tk.Button(master=frame, text="Powrót", command=on_back)
-        button.grid(row=3, column=len(list_label_el)-1)
+        button.grid(row=len(list_label_el)+1, column=2)
         if len(list_label_el) == 1:
-            button_back.grid(row=4, column=0)
+            button_back.grid(row=len(list_label_el)+1, column=0)
         else:
-            button_back.grid(row=3, column=0)
+            button_back.grid(row=len(list_label_el)+1, column=0)
         return frame
 
     @staticmethod

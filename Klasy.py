@@ -16,9 +16,11 @@ class Klasy(Methods):
 
     def show_frame(self) -> None:
         self.__list_teacher = self.__get_list_teacher()
+
         self.__rows = self.__get_rows_data()
+
         self._create_main_frame(self.__db, self.__window, "Klasy", "Dodaj klasę", self.__list_labels, self.__rows,
-                                self.__frame_add, self.__frame_edit, self.__frame_del).pack()
+                                self.__frame_add, self.__frame_edit, self.__frame_del)
 
     def __get_rows_data(self):
         cur = self.__db.cursor()
@@ -28,11 +30,6 @@ class Klasy(Methods):
             wychowawca = self.__get_teacher_name_by_pesel(wychowawca_pesel)
             rows.append([nazwa, rocznik, wychowawca])
         return rows
-
-    def __get_list_teacher(self):
-        cur = self.__db.cursor()
-        cur.execute("SELECT p.pesel, p.nazwisko, p.imie FROM nauczyciele n JOIN pracownicy p ON n.pesel = p.pesel")
-        return [[pesel, f"{nazwisko} {imie} ({pesel})"] for pesel, nazwisko, imie in cur.fetchall()]
 
     def __frame_add(self):
         list_teacher_name = [teacher[1] for teacher in self.__list_teacher]
@@ -142,3 +139,8 @@ class Klasy(Methods):
             if nauczyciel_pesel == pesel:
                 return nauczyciel
         return ""
+
+    def __get_list_teacher(self):
+        cur = self.__db.cursor()
+        cur.execute("SELECT p.pesel, p.nazwisko, p.imie FROM nauczyciele n JOIN pracownicy p ON n.pesel = p.pesel")
+        return [[pesel, f"{nazwisko} {imie} ({pesel})"] for pesel, nazwisko, imie in cur.fetchall()]

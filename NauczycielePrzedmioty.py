@@ -16,9 +16,13 @@ class NauczycielePrzedmioty(Methods):
     def show_frame(self) -> None:
         self.__list_przedmioty = self.__get_list_przedmioty()
         self.__list_teacher = self.__get_list_teacher()
+
         self.__rows = self.__get_rows_data()
+
         self._create_main_frame(self.__db, self.__window, "Przedmioty nauczycieli", "Dodaj nauczycielowi przedmiot",
-                                self.__list_labels, self.__rows, self.__frame_add, None, self.__frame_del).pack()
+                                self.__list_labels,
+                                self.__rows,
+                                self.__frame_add, None, self.__frame_del)
 
     def __get_rows_data(self):
         cur = self.__db.cursor()
@@ -33,35 +37,12 @@ class NauczycielePrzedmioty(Methods):
             rows.append([nauczyciel_name, przedmiot_name])
         return rows
 
-    def __get_list_przedmioty(self):
-        cur = self.__db.cursor()
-        cur.execute("SELECT nazwa FROM przedmioty")
-        return [el[0] for el in cur.fetchall()]
-
-    def __get_list_teacher(self):
-        cur = self.__db.cursor()
-        cur.execute("SELECT p.pesel, p.nazwisko || ' ' || p.imie FROM nauczyciele n JOIN pracownicy p ON n.pesel = p.pesel")
-        return [[pesel, nazwa+" ("+pesel+")"] for pesel, nazwa in cur.fetchall()]
-
     def __frame_add(self):
         self._create_add_frame(self.__window, "Dodanie nauczycielowi kolejnego przedmiotu", "Stwórz",
-                               self.__list_labels, [self.__get_list_teacher_name(), self.__list_przedmioty],
-                               self.__add_to_db, self.show_frame).pack()
-
-    def __add_to_db(self, list_data: list[str]):
-        list_data = self.__data_validation(list_data)
-        if list_data is not False:
-            try:
-                self.__db.execute("INSERT INTO Nauczyciele_przedmioty VALUES(?, ?)",
-                                  [self.__get_teacher_pesel(list_data[0]), list_data[1]])
-                self.show_frame()
-            except sqlite3.IntegrityError:
-                messagebox.showerror("Błąd podczas dodawania!", "Wybrany nauczyciel uczy już tego przedmiotu")
-                self.__db.rollback()
-            except Exception as e:
-                print(e)
-                messagebox.showerror("Błąd podczas dodawania!", "Niezydentyfikowany błąd")
-                self.__db.rollback()
+                               self.__list_labels,
+                               [self.__get_list_teacher_name(), self.__list_przedmioty],
+                               self.__add_to_db, self.show_frame
+                               ).pack()
 
     def __frame_del(self, index: int):
         arg = [self.__get_teacher_pesel(self.__rows[index][0]), self.__rows[index][1]]
@@ -93,6 +74,21 @@ class NauczycielePrzedmioty(Methods):
                 messagebox.showerror("Błąd przy usuwaniu rekordu!", f"Usunięcie się niepowiodło")
                 self.__db.rollback()
 
+    def __add_to_db(self, list_data: list[str]):
+        list_data = self.__data_validation(list_data)
+        if list_data is not False:
+            try:
+                self.__db.execute("INSERT INTO Nauczyciele_przedmioty VALUES(?, ?)",
+                                  [self.__get_teacher_pesel(list_data[0]), list_data[1]])
+                self.show_frame()
+            except sqlite3.IntegrityError:
+                messagebox.showerror("Błąd podczas dodawania!", "Wybrany nauczyciel uczy już tego przedmiotu")
+                self.__db.rollback()
+            except Exception as e:
+                print(e)
+                messagebox.showerror("Błąd podczas dodawania!", "Niezydentyfikowany błąd")
+                self.__db.rollback()
+
     def __data_validation(self, list_data):
         if not (
             self.check_value_from_list(list_data[0], self.__get_list_teacher_name(), "Nauczyciel") and
@@ -109,3 +105,13 @@ class NauczycielePrzedmioty(Methods):
             if teacher_name == nauczyciel_name:
                 return nauczyciel_pesel
         return ""
+
+    def __get_list_przedmioty(self):
+        cur = self.__db.cursor()
+        cur.execute("SELECT nazwa FROM przedmioty")
+        return [el[0] for el in cur.fetchall()]
+
+    def __get_list_teacher(self):
+        cur = self.__db.cursor()
+        cur.execute("SELECT p.pesel, p.nazwisko || ' ' || p.imie FROM nauczyciele n JOIN pracownicy p ON n.pesel = p.pesel")
+        return [[pesel, nazwa+" ("+pesel+")"] for pesel, nazwa in cur.fetchall()]

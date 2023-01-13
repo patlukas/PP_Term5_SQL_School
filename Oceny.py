@@ -9,19 +9,26 @@ class Oceny(Methods):
         self.__window = window
         self.__db = db
         self.__list_labels = ["Klasa | Uczeń", "Przedmiot (Nauczyciel)", "Data", "Ocena", "Waga", "Opis"]
+
+        self.__rows = []
+
         self.__list_ocen = ["1", "2", "3", "4", "5", "6"]
         self.__list_wag = ["1", "2", "3", "4", "5"]
         self.__list_przedmiot_and_teacher = []
         self.__list_uczniowie = []
         self.__list_id = []
-        self.__rows = []
 
     def show_frame(self) -> None:
         self.__list_przedmiot_and_teacher = self.__get_list_przedmiot_and_teacher()
         self.__list_uczniowie = self.__get_list_uczniowie()
+
         self.__rows, self.__list_id = self.__get_rows_data()
-        self._create_main_frame(self.__db, self.__window, "Oceny", "Dodaj nową ocenę", self.__list_labels, self.__rows,
-                                self.__frame_add, self.__frame_edit, self.__frame_del).pack()
+
+        self._create_main_frame(self.__db, self.__window, "Oceny", "Dodaj nową ocenę",
+                                self.__list_labels,
+                                self.__rows,
+                                self.__frame_add, self.__frame_edit, self.__frame_del
+                                )
 
     def __get_rows_data(self):
         cur = self.__db.cursor()
@@ -42,21 +49,33 @@ class Oceny(Methods):
             list_id.append(row[0])
         return rows, list_id
 
-    def __get_list_przedmiot_and_teacher(self):
-        cur = self.__db.cursor()
-        cur.execute("SELECT np.przedmiot_nazwa, p.pesel, p.nazwisko || ' ' || p.imie FROM nauczyciele_przedmioty np JOIN pracownicy p ON p.pesel = np.nauczyciel_pesel")
-        return [[el[0], el[1], el[2], f"{el[0]} <{el[2]} ({el[1]})>"] for el in cur.fetchall()]
-
-    def __get_list_uczniowie(self):
-        cur = self.__db.cursor()
-        cur.execute("SELECT pesel, imie, nazwisko, klasy_nazwa, klasy_rocznik FROM uczniowie")
-        return [[el[0], f"{el[3]} {el[4]} | {el[2]} {el[1]} ({el[0]})"] for el in cur.fetchall()]
-
     def __frame_add(self):
-        self._create_add_frame(self.__window, "Dodanie oceny", "Dodaj ocenę", self.__list_labels,
-                               [self.__get_list_klas_and_uczen_title(),
-                                self.__get_list_przedmiot_and_teacher_title(), str, self.__list_ocen,
-                                self.__list_wag, str], self.__add_to_db, self.show_frame).pack()
+        self._create_add_frame(self.__window, "Dodanie oceny", "Dodaj ocenę",
+                               self.__list_labels,
+                               [self.__get_list_klas_and_uczen_title(), self.__get_list_przedmiot_and_teacher_title(),
+                                str, self.__list_ocen, self.__list_wag, str],
+                               self.__add_to_db, self.show_frame
+                               ).pack()
+
+    def __frame_edit(self, index: int):
+        self._create_edit_frame(self.__window, "Edycja oceny", "Edytuj ocenę",
+                                self.__list_labels,
+                                self.__rows[index],
+                                [self.__get_list_klas_and_uczen_title(), self.__get_list_przedmiot_and_teacher_title(),
+                                 str, self.__list_ocen, self.__list_wag, str],
+                                lambda list_data: self.__edit_row_in_db(list_data, index), self.show_frame
+                                ).pack()
+
+    def __frame_del(self, index: int):
+        decision = messagebox.askquestion("Usuwanie rekordu", f"Czy jesteś pewny że chcesz usunąć ocenę?")
+        if decision == "yes":
+            try:
+                self.__db.execute("DELETE FROM oceny WHERE id=?", [self.__list_id[index]])
+                self.show_frame()
+            except Exception as e:
+                print(e)
+                messagebox.showerror("Błąd przy usuwaniu rekordu!", f"Usunięcie oceny się niepowiodło")
+                self.__db.rollback()
 
     def __add_to_db(self, list_data: list[str]):
         list_data = self.__data_validation(list_data)
@@ -72,12 +91,6 @@ class Oceny(Methods):
                 messagebox.showerror("Błąd podczas dodawania oceny!", "Niezydentyfikowany błąd")
                 self.__db.rollback()
 
-    def __frame_edit(self, index: int):
-        self._create_edit_frame(self.__window, "Edycja oceny", "Edytuj ocenę", self.__list_labels, self.__rows[index],
-                                [self.__get_list_klas_and_uczen_title(), self.__get_list_przedmiot_and_teacher_title(),
-                                 str, self.__list_ocen, self.__list_wag, str],
-                                lambda list_data: self.__edit_row_in_db(list_data, index), self.show_frame).pack()
-
     def __edit_row_in_db(self, list_data, index):
         list_data = self.__data_validation(list_data)
         if list_data is not False:
@@ -91,17 +104,6 @@ class Oceny(Methods):
             except Exception as e:
                 print(e)
                 messagebox.showerror("Błąd przy edycji oceny!", "Niezydentyfikowany błąd")
-                self.__db.rollback()
-
-    def __frame_del(self, index: int):
-        decision = messagebox.askquestion("Usuwanie rekordu", f"Czy jesteś pewny że chcesz usunąć ocenę?")
-        if decision == "yes":
-            try:
-                self.__db.execute("DELETE FROM oceny WHERE id=?", [self.__list_id[index]])
-                self.show_frame()
-            except Exception as e:
-                print(e)
-                messagebox.showerror("Błąd przy usuwaniu rekordu!", f"Usunięcie oceny się niepowiodło")
                 self.__db.rollback()
 
     def __data_validation(self, list_data):
@@ -133,3 +135,13 @@ class Oceny(Methods):
             if title == name:
                 return przedmiot, pesel
         raise Exception("Brak przedmiotu i peselu nauczyciela")
+
+    def __get_list_przedmiot_and_teacher(self):
+        cur = self.__db.cursor()
+        cur.execute("SELECT np.przedmiot_nazwa, p.pesel, p.nazwisko || ' ' || p.imie FROM nauczyciele_przedmioty np JOIN pracownicy p ON p.pesel = np.nauczyciel_pesel")
+        return [[el[0], el[1], el[2], f"{el[0]} <{el[2]} ({el[1]})>"] for el in cur.fetchall()]
+
+    def __get_list_uczniowie(self):
+        cur = self.__db.cursor()
+        cur.execute("SELECT pesel, imie, nazwisko, klasy_nazwa, klasy_rocznik FROM uczniowie")
+        return [[el[0], f"{el[3]} {el[4]} | {el[2]} {el[1]} ({el[0]})"] for el in cur.fetchall()]

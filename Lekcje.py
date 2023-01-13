@@ -10,15 +10,20 @@ class Lekcje(Methods):
         self.__window = window
         self.__db = db
         self.__list_labels = ["Klasa (Zajęcia)", "Data zajęć", "Temat"]
+
+        self.__rows = []
+
         self.__list_zajecia = self.__get_list_zajecia()
         self.__list_id = []
-        self.__rows = []
 
     def show_frame(self) -> None:
         self.__list_zajecia = self.__get_list_zajecia()
         self.__rows, self.__list_id = self.__get_rows_data()
-        self._create_main_frame(self.__db, self.__window, "Lekcje", "Dowaj nową lekcję", self.__list_labels,
-                                self.__rows, self.__frame_add, self.__frame_edit, self.__frame_del).pack()
+        self._create_main_frame(self.__db, self.__window, "Lekcje", "Dowaj nową lekcję",
+                                self.__list_labels,
+                                self.__rows,
+                                self.__frame_add, self.__frame_edit, self.__frame_del
+                                )
 
     def __get_rows_data(self):
         cur = self.__db.cursor()
@@ -34,14 +39,28 @@ class Lekcje(Methods):
             list_id.append(row[0])
         return rows, list_id
 
-    def __get_list_zajecia(self):
-        cur = self.__db.cursor()
-        cur.execute("SELECT id, przedmioty_nazwa, klasy_nazwa, klasy_rocznik, dzień_zajęc, godzina_zajęć FROM zajecia")
-        return [[el[0], el[4], f"{el[2]} {el[3]} ({el[1]} | {el[4]} {el[5]})"] for el in cur.fetchall()]
-
     def __frame_add(self):
-        self._create_add_frame(self.__window, "Dodawanie lekcji", "Dodaj lekcję", self.__list_labels,
-                               [self.__get_list_zajecia_title(), str, str], self.__add_to_db, self.show_frame).pack()
+        self._create_add_frame(self.__window, "Dodawanie lekcji", "Dodaj lekcję",
+                               self.__list_labels,
+                               [self.__get_list_zajecia_title(), str, str],
+                               self.__add_to_db, self.show_frame
+                               ).pack()
+
+    def __frame_edit(self, index: int):
+        self._create_edit_frame(self.__window, "Edycja lekcji", "Edytuj lekcję", self.__list_labels, self.__rows[index],
+                                [self.__get_list_zajecia_title(), str, str],
+                                lambda data: self.__edit_row_in_db(data, index), self.show_frame).pack()
+
+    def __frame_del(self, index: int):
+        decision = messagebox.askquestion("Usuwanie rekordu", f"Czy jesteś pewny że chcesz usunąć lekcje?")
+        if decision == "yes":
+            try:
+                self.__db.execute("DELETE FROM lekcje WHERE id=?", [self.__list_id[index]])
+                self.show_frame()
+            except Exception as e:
+                print(e)
+                messagebox.showerror("Błąd przy usuwaniu rekordu!", f"Usunięcie lekcji się niepowiodło")
+                self.__db.rollback()
 
     def __add_to_db(self, list_data: list[str]):
         list_data = self.__data_validation(list_data, -1)
@@ -56,11 +75,6 @@ class Lekcje(Methods):
                 messagebox.showerror("Błąd podczas dodawania!", "Niezydentyfikowany błąd")
                 self.__db.rollback()
 
-    def __frame_edit(self, index: int):
-        self._create_edit_frame(self.__window, "Edycja lekcji", "Edytuj lekcję", self.__list_labels, self.__rows[index],
-                                [self.__get_list_zajecia_title(), str, str],
-                                lambda data: self.__edit_row_in_db(data, index), self.show_frame).pack()
-
     def __edit_row_in_db(self, list_data, index):
         list_data = self.__data_validation(list_data, self.__list_id[index])
         if list_data is not False:
@@ -74,16 +88,7 @@ class Lekcje(Methods):
                 messagebox.showerror("Błąd przy edycji lekcji!", "Niezydentyfikowany błąd")
                 self.__db.rollback()
 
-    def __frame_del(self, index: int):
-        decision = messagebox.askquestion("Usuwanie rekordu", f"Czy jesteś pewny że chcesz usunąć lekcje?")
-        if decision == "yes":
-            try:
-                self.__db.execute("DELETE FROM lekcje WHERE id=?", [self.__list_id[index]])
-                self.show_frame()
-            except Exception as e:
-                print(e)
-                messagebox.showerror("Błąd przy usuwaniu rekordu!", f"Usunięcie lekcji się niepowiodło")
-                self.__db.rollback()
+
 
     def __data_validation(self, list_data, lekcje_id):
         if not (
@@ -140,3 +145,8 @@ class Lekcje(Methods):
                                  f"Dzień tygodnia w wybranej dacie to {list_day_of_week[nr_day]}, "
                                  f"a zajęcia odbywają się w {day_of_week}")
         return False
+
+    def __get_list_zajecia(self):
+        cur = self.__db.cursor()
+        cur.execute("SELECT id, przedmioty_nazwa, klasy_nazwa, klasy_rocznik, dzień_zajęc, godzina_zajęć FROM zajecia")
+        return [[el[0], el[4], f"{el[2]} {el[3]} ({el[1]} | {el[4]} {el[5]})"] for el in cur.fetchall()]

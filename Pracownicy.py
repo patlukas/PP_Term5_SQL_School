@@ -15,12 +15,13 @@ class Pracownicy(Methods):
         self.__list_etat = []
 
     def show_frame(self) -> None:
-        self.__db.commit()
         self.__list_etat_row = self.__get_list_etat_row()
         self.__list_etat = [row[0] for row in self.__list_etat_row]
+
         self.__rows = self.__get_rows_data()
-        self._create_main_frame(self.__db, self.__window, "Pracownicy", "Dodaj etat", self.__list_labels, self.__rows,
-                                self.__frame_add, self.__frame_edit_row, self.__frame_del_row).pack()
+
+        self._create_main_frame(self.__db, self.__window, "Pracownicy", "Dodaj pracownika", self.__list_labels, self.__rows,
+                                self.__frame_add, self.__frame_edit, self.__frame_del)
 
     def __get_rows_data(self):
         cur = self.__db.cursor()
@@ -33,22 +34,17 @@ class Pracownicy(Methods):
             rows.append(list(pracownik) + [pracownik[0] in nauczyciele])
         return rows
 
-    def __get_list_etat_row(self):
-        cur = self.__db.cursor()
-        cur.execute("SELECT * FROM etaty")
-        return cur.fetchall()
-
     def __frame_add(self):
         self._create_add_frame(self.__window, "Dodanie pracownika", "Stwórz pracownika", self.__list_labels,
                                [str, str, str, str, str, str, self.__list_etat, bool], self.__add_to_db, self.show_frame
                                ).pack()
 
-    def __frame_edit_row(self, index: int):
+    def __frame_edit(self, index: int):
         self._create_edit_frame(self.__window, "Edycja pracownika", "Edytuj pracownika", self.__list_labels,
                                 self.__rows[index], [None, str, str, str, str, str, self.__list_etat, bool],
                                 self.__edit_row_in_db, self.show_frame).pack()
 
-    def __frame_del_row(self, index: int):
+    def __frame_del(self, index: int):
         pesel = self.__rows[index][0]
         if self.__check_teacher_is_used(pesel, "Nie można usunąć pracownika z rolą nauczyciela"):
             return
@@ -108,6 +104,32 @@ class Pracownicy(Methods):
                 print(e)
                 messagebox.showerror("Błąd przy edycji pracownika!", "Niezydentyfikowany błąd")
 
+    def __data_validation(self, list_data):
+        if not (
+                self.check_pesel(list_data[0]) and
+                self.check_varchar2(list_data[1], 30, "Imie") and
+                self.check_varchar2(list_data[2], 30, "Nazwisko") and
+                self.check_date(list_data[3], "Data urodzenia") and
+                self.check_date(list_data[4], "Data zatrudnienia") and
+                self.check_number(list_data[5], 9, 2, "Płaca") and
+                self.check_value_from_list(list_data[6], self.__list_etat, "Etat")
+        ):
+            return False
+
+        list_data[5] = float(list_data[5])
+        list_data[3], list_data[4] = list_data[3].strip(), list_data[4].strip()
+        for etat_row in self.__list_etat_row:
+            if etat_row[0] == list_data[6]:
+                if list_data[5] < float(etat_row[1]) or list_data[5] > float(etat_row[2]):
+                    messagebox.showerror("Błędna płaca!", f"Płaca musi być z przedniału od {etat_row[1]} do {etat_row[2]}")
+                    return False
+        return list_data
+
+    def __get_list_etat_row(self):
+        cur = self.__db.cursor()
+        cur.execute("SELECT * FROM etaty")
+        return cur.fetchall()
+
     def __check_teacher_is_used(self, pesel, message):
         check_data = [
             [
@@ -131,24 +153,3 @@ class Pracownicy(Methods):
             ]
         ]
         return not self.check_delete_is_possible(self.__db, check_data)
-
-    def __data_validation(self, list_data):
-        if not (
-                self.check_pesel(list_data[0]) and
-                self.check_varchar2(list_data[1], 30, "Imie") and
-                self.check_varchar2(list_data[2], 30, "Nazwisko") and
-                self.check_date(list_data[3], "Data urodzenia") and
-                self.check_date(list_data[4], "Data zatrudnienia") and
-                self.check_number(list_data[5], 9, 2, "Płaca") and
-                self.check_value_from_list(list_data[6], self.__list_etat, "Etat")
-        ):
-            return False
-
-        list_data[5] = float(list_data[5])
-        list_data[3], list_data[4] = list_data[3].strip(), list_data[4].strip()
-        for etat_row in self.__list_etat_row:
-            if etat_row[0] == list_data[6]:
-                if list_data[5] < float(etat_row[1]) or list_data[5] > float(etat_row[2]):
-                    messagebox.showerror("Błędna płaca!", f"Płaca musi być z przedniału od {etat_row[1]} do {etat_row[2]}")
-                    return False
-        return list_data
