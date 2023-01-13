@@ -23,7 +23,7 @@ class MainGui:
         window.title("Szkoła")
         window.geometry('+10+10')  # odległość od górnej i lewej krawędzi
         window.resizable(False, False)
-        window.minsize(700, 400)
+        window.minsize(900, 400)
         window.update_idletasks()
         return window
 
@@ -31,7 +31,7 @@ class MainGui:
         frame = tk.Frame(master=self.__main_window)
         # frame.grid(row=1, column=0)
         # frame.pack()
-        frame.place(x=0, y=30, width=700, height=370)
+        frame.place(x=0, y=30, width=900, height=370)
 
         return frame
 
@@ -47,7 +47,7 @@ class MainGui:
             button.pack(side=tk.LEFT)
         # frame.grid(row=0, column=0)
         # frame.pack(side=tk.LEFT)
-        frame.place(x=0, y=0, width=700)
+        frame.place(x=450, y=15, anchor=tk.CENTER)
 
     def __on_click_nav_column_button(self, index_selected_option: int) -> None:
         for i, button in enumerate(self.__list_buttons):

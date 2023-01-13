@@ -14,17 +14,17 @@ class Methods:
         frame = tk.Frame(master=window)
         # frame["borderwidth"] = 5
         # frame["relief"] = "groove"
-        tk.Label(master=frame, text=title).place(x=250, y=0, width=200)
+        tk.Label(master=frame, text=title).place(x=350, y=0, width=200)
         table = self._create_table(frame, labels, column_widths, rows, frame_edit, frame_del)
         x_scroll = tk.Scrollbar(master=window, orient=tk.HORIZONTAL, command=table.xview)
         y_scroll = tk.Scrollbar(master=window, orient=tk.VERTICAL, command=table.yview)
         table.configure(xscroll=x_scroll.set, yscroll=y_scroll.set)
-        table.place(x=0, y=30, width=685, height=300)
-        x_scroll.place(x=0, y=320, width=685, height=15)
-        y_scroll.place(x=685, y=30, width=15, height=300)
-        tk.Button(master=frame, text=title_btn_add, command=frame_add).place(x=500, y=335)
+        table.place(x=0, y=30, width=885, height=300)
+        x_scroll.place(x=0, y=320, width=885, height=15)
+        y_scroll.place(x=885, y=30, width=15, height=300)
+        tk.Button(master=frame, text=title_btn_add, command=frame_add).place(x=875, y=335, anchor=tk.NE)
 
-        frame.place(x=0, y=0, width=700, height=370)
+        frame.place(x=0, y=0, width=900, height=370)
         # return frame
 
     def _create_add_frame(self, window, title, name_btn_add, labels, type_columns, on_add, on_back):
