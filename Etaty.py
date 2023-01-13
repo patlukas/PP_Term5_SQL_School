@@ -9,6 +9,7 @@ class Etaty(Methods):
         self.__window = window
         self.__db = db
         self.__list_labels = ["Nazwa etatu", "Płaca minimalna", "Płaca maksymalna"]
+        self.__column_widths = [200, 200, 200]
         self.__rows = []
         self.__keys = []
 
@@ -17,6 +18,7 @@ class Etaty(Methods):
 
         self._create_main_frame(self.__db, self.__window, "Etaty", "Dodaj etat",
                                 self.__list_labels,
+                                self.__column_widths,
                                 self.__rows,
                                 self.__frame_add, self.__frame_edit, self.__frame_del)
 

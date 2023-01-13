@@ -9,6 +9,7 @@ class Sprawdziany(Methods):
         self.__window = window
         self.__db = db
         self.__list_labels = ["Klasa", "Przedmiot (Nauczyciel)", "Data", "Opis"]
+        self.__column_widths = [100, 300, 80, 200]
 
         self.__rows = []
 
@@ -22,8 +23,9 @@ class Sprawdziany(Methods):
 
         self.__rows, self.__list_id = self.__get_rows_data()
 
-        self._create_main_frame(self.__db, self.__window, "Sprawdziany", "Dodaj nowy sprawdzian",
+        self._create_main_frame(self.__db, self.__window, "Sprawdziany", "Dodaj sprawdzian",
                                 self.__list_labels,
+                                self.__column_widths,
                                 self.__rows,
                                 self.__frame_add, self.__frame_edit, self.__frame_del
                                 )

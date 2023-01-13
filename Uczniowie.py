@@ -9,6 +9,7 @@ class Uczniowie(Methods):
         self.__window = window
         self.__db = db
         self.__list_labels = ["Pesel", "Imie", "Nazwisko", "Data urodzenia", "Klasa"]
+        self.__column_widths = [80, 100, 100, 100, 100]
         self.__rows = []
 
         self.__klasy_rows = []
@@ -20,8 +21,9 @@ class Uczniowie(Methods):
 
         self.__rows = self.__get_rows_data()
 
-        self._create_main_frame(self.__db, self.__window, "Uczniowie", "Dowaj nowego ucznia",
+        self._create_main_frame(self.__db, self.__window, "Uczniowie", "Dodaj ucznia",
                                 self.__list_labels,
+                                self.__column_widths,
                                 self.__rows,
                                 self.__frame_add, self.__frame_edit, self.__frame_del)
 

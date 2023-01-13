@@ -9,6 +9,7 @@ class NauczycielePrzedmioty(Methods):
         self.__window = window
         self.__db = db
         self.__list_labels = ["Nauczyciel", "Przedmiot"]
+        self.__column_widths = [300, 300]
         self.__list_przedmioty = []
         self.__list_teacher = []
         self.__rows = []
@@ -21,6 +22,7 @@ class NauczycielePrzedmioty(Methods):
 
         self._create_main_frame(self.__db, self.__window, "Przedmioty nauczycieli", "Dodaj nauczycielowi przedmiot",
                                 self.__list_labels,
+                                self.__column_widths,
                                 self.__rows,
                                 self.__frame_add, None, self.__frame_del)
 

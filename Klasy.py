@@ -10,6 +10,8 @@ class Klasy(Methods):
         self.__window = window
         self.__db = db
         self.__list_labels = ["Nazwa", "Rocznik", "Wychowawca"]
+        self.__column_widths = [100, 100, 100]
+
         self.__list_teacher = []
         self.__rows = []
         self.__list_rocznik = [f"{r}/{r + 1}" for r in range(date.today().year, 2000, -1)]
@@ -19,7 +21,10 @@ class Klasy(Methods):
 
         self.__rows = self.__get_rows_data()
 
-        self._create_main_frame(self.__db, self.__window, "Klasy", "Dodaj klasę", self.__list_labels, self.__rows,
+        self._create_main_frame(self.__db, self.__window, "Klasy", "Dodaj klasę",
+                                self.__list_labels,
+                                self.__column_widths,
+                                self.__rows,
                                 self.__frame_add, self.__frame_edit, self.__frame_del)
 
     def __get_rows_data(self):

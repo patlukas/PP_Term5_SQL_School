@@ -9,6 +9,7 @@ class Zajecia(Methods):
         self.__window = window
         self.__db = db
         self.__list_labels = ["Klasa", "Dzień zajęć", "Godzina zajęć", "Sala", "Przedmiot i Nauczyciel"]
+        self.__column_widths = [100, 80, 80, 60, 320]
         self.__list_day = ["Poniedziałek", "Wtorek", "Środa", "Czwartek", "Piątek", "Sobota", "Niedziela"]
         self.__list_hour = ["8:00 - 8:45", "8:55 - 9:40", "9:50 - 10:35", "10:45 - 11:30", "11:45 - 12:30", "12:40 - 13:25", "13:35 - 14:20", "14:30 - 15:15", "15:25 - 16:10"]
         self.__list_przedmiot_and_teacher = []
@@ -22,8 +23,11 @@ class Zajecia(Methods):
         self.__list_klasy = self.__get_list_klasy()
         self.__list_sale = self.__get_list_sale()
         self.__rows, self.__list_id = self.__get_rows_data()
-        self._create_main_frame(self.__db, self.__window, "Zajęcia", "Dowaj nowe zajęcia", self.__list_labels,
-                                self.__rows, self.__frame_add, self.__frame_edit, self.__frame_del)
+        self._create_main_frame(self.__db, self.__window, "Zajęcia", "Dodaj zajęcia",
+                                self.__list_labels,
+                                self.__column_widths,
+                                self.__rows,
+                                self.__frame_add, self.__frame_edit, self.__frame_del)
 
     def __get_rows_data(self):
         cur = self.__db.cursor()

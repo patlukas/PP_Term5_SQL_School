@@ -7,7 +7,7 @@ import sqlite3
 
 
 class Methods:
-    def _create_main_frame(self, db, window, title, title_btn_add, labels, rows, frame_add, frame_edit, frame_del):
+    def _create_main_frame(self, db, window, title, title_btn_add, labels, column_widths, rows, frame_add, frame_edit, frame_del):
         db.commit()
         for x in window.winfo_children():
             x.destroy()
@@ -15,14 +15,14 @@ class Methods:
         # frame["borderwidth"] = 5
         # frame["relief"] = "groove"
         tk.Label(master=frame, text=title).place(x=250, y=0, width=200)
-        table = self._create_table(frame, labels, rows, frame_edit, frame_del)
+        table = self._create_table(frame, labels, column_widths, rows, frame_edit, frame_del)
         x_scroll = tk.Scrollbar(master=window, orient=tk.HORIZONTAL, command=table.xview)
         y_scroll = tk.Scrollbar(master=window, orient=tk.VERTICAL, command=table.yview)
         table.configure(xscroll=x_scroll.set, yscroll=y_scroll.set)
-        table.place(x=0, y=30, width=700, height=300)
-        x_scroll.place(x=0, y=320, width=700, height=15)
+        table.place(x=0, y=30, width=685, height=300)
+        x_scroll.place(x=0, y=320, width=685, height=15)
         y_scroll.place(x=685, y=30, width=15, height=300)
-        tk.Button(master=frame, text=title_btn_add, command=frame_add).place(x=0, y=335)
+        tk.Button(master=frame, text=title_btn_add, command=frame_add).place(x=500, y=335)
 
         frame.place(x=0, y=0, width=700, height=370)
         # return frame
@@ -39,13 +39,13 @@ class Methods:
         frame = self._create_frame_edit_or_add(window, title, labels, values, type_columns, on_add, name_btn_add, on_back)
         return frame
 
-    def _create_table(self, master, labels, rows, on_edit, on_del):
+    def _create_table(self, master, labels, column_widths, rows, on_edit, on_del):
         table = ttk.Treeview(master=master)
         # table.place(relx=0, rely=0, width=400)
         table['columns'] = labels
         table.column("#0", width=0, stretch=tk.NO)
         for i in range(len(labels)):
-            table.column(labels[i], anchor=tk.CENTER, width=100 + i*50)
+            table.column(labels[i], anchor=tk.CENTER, width=column_widths[i], minwidth=column_widths[i])
             table.heading(labels[i], text=labels[i], anchor=tk.CENTER)
         # print(rows)
         for i, row in enumerate(rows):
@@ -54,9 +54,6 @@ class Methods:
                 val_row.append(one_val if type(one_val) != bool else ("Tak" if one_val else "Nie"))
             table.insert(parent='', index='end', iid=i, text='', values=val_row)
         table.bind("<Button-3>", lambda x: self.__table_right_click(table, on_edit, on_del, x))
-        # scroll = tk.Scrollbar(master=master, orient=tk.VERTICAL, command=table.yview)
-        # table.configure(yscroll=scroll.set)
-        # scroll.grid(row=0, column=1, sticky='ns')
         return table
 
     @staticmethod

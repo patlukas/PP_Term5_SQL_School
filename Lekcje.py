@@ -10,7 +10,7 @@ class Lekcje(Methods):
         self.__window = window
         self.__db = db
         self.__list_labels = ["Klasa (Zajęcia)", "Data zajęć", "Temat"]
-
+        self.__column_widths = [300, 80, 300]
         self.__rows = []
 
         self.__list_zajecia = self.__get_list_zajecia()
@@ -19,8 +19,9 @@ class Lekcje(Methods):
     def show_frame(self) -> None:
         self.__list_zajecia = self.__get_list_zajecia()
         self.__rows, self.__list_id = self.__get_rows_data()
-        self._create_main_frame(self.__db, self.__window, "Lekcje", "Dowaj nową lekcję",
+        self._create_main_frame(self.__db, self.__window, "Lekcje", "Dodaj lekcję",
                                 self.__list_labels,
+                                self.__column_widths,
                                 self.__rows,
                                 self.__frame_add, self.__frame_edit, self.__frame_del
                                 )

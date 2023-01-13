@@ -10,6 +10,7 @@ class Pracownicy(Methods):
         self.__db = db
         self.__list_labels = ["Pesel", "Imie", "Nazwisko", "Data urodzenia", "Data zatrudnienia", "Płaca", "Etat",
                               "Czy nauczyciel"]
+        self.__column_widths = [80, 100, 100, 100, 100, 100, 100, 100]
         self.__rows = []
         self.__list_etat_row = []
         self.__list_etat = []
@@ -20,7 +21,10 @@ class Pracownicy(Methods):
 
         self.__rows = self.__get_rows_data()
 
-        self._create_main_frame(self.__db, self.__window, "Pracownicy", "Dodaj pracownika", self.__list_labels, self.__rows,
+        self._create_main_frame(self.__db, self.__window, "Pracownicy", "Dodaj pracownika",
+                                self.__list_labels,
+                                self.__column_widths,
+                                self.__rows,
                                 self.__frame_add, self.__frame_edit, self.__frame_del)
 
     def __get_rows_data(self):

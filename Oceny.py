@@ -9,6 +9,7 @@ class Oceny(Methods):
         self.__window = window
         self.__db = db
         self.__list_labels = ["Klasa | Uczeń", "Przedmiot (Nauczyciel)", "Data", "Ocena", "Waga", "Opis"]
+        self.__column_widths = [300, 300, 80, 60, 60, 200]
 
         self.__rows = []
 
@@ -24,8 +25,9 @@ class Oceny(Methods):
 
         self.__rows, self.__list_id = self.__get_rows_data()
 
-        self._create_main_frame(self.__db, self.__window, "Oceny", "Dodaj nową ocenę",
+        self._create_main_frame(self.__db, self.__window, "Oceny", "Dodaj ocenę",
                                 self.__list_labels,
+                                self.__column_widths,
                                 self.__rows,
                                 self.__frame_add, self.__frame_edit, self.__frame_del
                                 )
